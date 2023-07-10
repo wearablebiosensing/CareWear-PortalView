@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "carewear-77d8e",
+  "private_key_id": "b0c3a74e907cc08a5b24c2fc84df50632ce57d3a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDw3VmzjyWtfCgI\nbomirqPmI4HUOBuRug/E3PdFmLCvoyb4YtGbeL97Q3y/oalpF+nRRJOyNJ3uuP1k\niWDdyXqcLyNhMC5rQOSlrxT+K+N+8UDHVUhW/fd1OOFixHVbKMW5/1QiqikdrBlb\nxmm+B2LzO4w+KGIywQBk/X1xN9CfsXEReiq9dZLKYvJX5bvNUlw4JRS/31Na4q9z\nAY9QnP6kbuhxglkt5/ZQcH0zLBa2ut6j4FigVJN/Wp6cWSj8rWHCagxXvqCEQ7lS\nqQgdKyeH5WdX4s6yXLecDnW57Q5Zj33uMmb9BxHFTNqlkizoDAt5hzus8UncN3b4\nejtUSw1xAgMBAAECggEABMeIpNJsp4jO2M18Nc4gNpQqaqgPHHz4HIJ7td3j9iU/\nNAcudHbAunD+MgWCwYEJ6McTBPKMNnklXowHD/mUMTKSgbaBekt6KgM7j/hWGh4O\niHIL1p2RHipp9wIx17RrOX/MdyhgGtyQD4EUNrMJ8qyCIbbejXYk1EwvI7qtPSjv\n6/YGhFtD67NERXHVA3xjMjNzDwojEaetwfHiAAFnvV9qUaGTG1PSXR4loh0qy6+I\nBMXio0r/kXLSiZTrngJILImyyu+gKTm6DpQ2WC83eFQT0ZO1lxpK6E7yJKnLwysH\nj2XjyKEXz8q21cMQ1N7Tm+Dz9OITf5s8UgHark59oQKBgQD6aGMOd/H3Dg6m/I+0\n+eKqr9BLu80Shx7TR/JE2KfYjKc4u1DkzRVzh+MYGVMNpk2qmI2roSH5zIIoMxDP\nFLVRzmQ5G0ZblJucvD19xaMVghWC8MlLXORBx2wK3ncgJf+025GpixZRYbzNz4jT\nBNn+yeEqJ9KI2IG4kquubnJ2EQKBgQD2Pmd+bYsh/Iqh6FbJD57Bcr8o6XUEXyC7\nbcEWi4Opal4rmWyAcVK5t+dL+ZcbLepTvWL1Z7Oq2RHTEEZUxvQs4J7djpmLKEAg\nwoMhCzmkSm6UPUMXOP+jLIXh+Jhbr3yx0i3vzL2E01K0Ssek4L2WlLEWgrbpIykz\nz9dlgdJBYQKBgDVlgxH3w9IR3k//dUl7K7mIChvMLTuxMoKNSf0iUhBcVeBEGUjg\n7p0XMfbWl55GgzNImpUppAwXbv3RfdkaqluKbla7GTK4KsKuZVJnjZItjhbA77ux\nUD8ynjhnHfHuCGvxkkscDKNH+zHL+no9A5tQQ0JxAXUK7gaEyDVG+gNxAoGBANkS\naA+mp6k9RES4WZEDCRNFgUiijPpela9EcJvcPyOg1gUfSevsel2nxelOzCs0jcZm\nRI9LbLImizUBus5PWL8bAFEVvTtULzvx3MDLcXPn/ZUGcFdPcuO4gwmSKVVh3M2x\nF7e2SDeIRvcSmO47BEZzK61Ja88XpOG8zgf4qo3hAoGBAOF5Xjz0j9kVxaU7WE3W\nu1O/Ivj/Syc8owjV+Gma7o9Y/iVXcvvEfy1JF5VMx2oxweaFX8ctY7OsGcO4qgbT\nomMUrbJBbs2FFDBoGsSFKeSc9gsB7p8PkYqku10MC8E/vak6k/WfcMofAah/gi4E\nhHlGU8C8aLHAvS931VtVlTGt\n-----END PRIVATE KEY-----\n",
+  "client_email": "carewear-77d8e@appspot.gserviceaccount.com",
+  "client_id": "109467643174093294524",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/carewear-77d8e%40appspot.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

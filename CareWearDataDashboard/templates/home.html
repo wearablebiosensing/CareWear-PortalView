@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+       <meta charset="UTF-8">
+       <meta http-equiv="X-UA-Compatible" content="IE=edge">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+       <!---Add Font Style -->
+       <link href='https://fonts.googleapis.com/css?family=Actor' rel='stylesheet'>
+       <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" charset="utf-8"></script>
+       <title>CareHub</title> 
+   <style>
+         .center-title {
+               text-align: center;
+               margin-bottom: 4%;
+      }
+      .info-text{
+         font-family: 'Actor';
+         font-size: 22px;
+      }
+      </style>
+</head>
+
+<body>
+
+   <!-- only for top div margin to include title. -->
+   <div class="center-title">
+      <h2>  CareHub KPI Dashboard </h2>
+    
+   </div>
+   {% for device in file_count_json %}
+      <div style ="position: relative ;
+         width: 1371px;
+         height: 143px;
+         flex-shrink: 0;border-radius: 10px;
+         margin-bottom: 5%;
+         margin-left: 5%;
+         margin-right: 5%;
+         background: #F2F2F2;">
+            <div style = "position: absolute;
+                        top: 10px;
+                        left: 10px;
+                        width: 235px;
+                        height: 120px;
+                        flex-shrink: 0;border-radius: 10px;
+                        background: #FDFDFD;
+                        backdrop-filter: blur(27.182817459106445px); ">
+            <div class="info-text"> Device : {{ device }}</div>
+            </div>
+            <div style = " position: absolute;
+                  top: 10px;
+                  left: 260px;
+                  width: 235px;
+                  height: 120px;
+                  flex-shrink: 0;border-radius: 10px;
+                  background: #FDFDFD;
+                  backdrop-filter: blur(27.182817459106445px); ">
+            </div>
+            <div style = " position: absolute;
+            top: 10px;
+            left: 520px;
+            width: 235px;
+            height: 120px;
+            flex-shrink: 0;border-radius: 10px;
+            background: #FDFDFD;
+            backdrop-filter: blur(27.182817459106445px); ">
+               <div class="info-text"> Acc info: {{ file_count_json[device][0] }}</div>
+
+            </div>
+            <div style = "position: absolute;
+            top: 10px;
+            left: 775px;
+            width: 235px;
+            height: 120px;
+            flex-shrink: 0;border-radius: 10px;
+            background: #FDFDFD;
+            backdrop-filter: blur(27.182817459106445px);">
+                     <div class="info-text"> Gry info: {{ file_count_json[device][1] }}</div>
+   
+         </div>
+            
+            <div style = "position: absolute;
+            top: 10px;
+            left: 1040px;
+            width: 235px;
+            height: 120px;
+            flex-shrink: 0;border-radius: 10px;
+            background: #FDFDFD;
+            backdrop-filter: blur(27.182817459106445px);">
+                     <div class="info-text"> Battery info: {{ file_count_json[device][2] }}</div>
+   
+         </div>
+         </div>
+   {% endfor %}
+</body>
+</html>
