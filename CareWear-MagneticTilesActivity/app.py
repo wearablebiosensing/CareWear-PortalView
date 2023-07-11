@@ -6,7 +6,7 @@ import io
 
 app = Flask(__name__)
 root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
-cred = credentials.Certificate(root + 'carewear-77d8e-b0c3a74e907c.json')
+cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json')
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
   "authDomain": "carewear-77d8e.firebaseapp.com",
