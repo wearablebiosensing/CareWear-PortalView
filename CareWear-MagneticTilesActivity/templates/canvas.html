@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/global.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container" id="container">
+      <div class="item">
+        <!-- Content for item 1 -->
+
+        <div id="shapeContainer">
+          <img
+            class="building-blocks"
+            src="{{ url_for('static', filename='images/square.png') }}"
+            data-shape="square"
+          />
+          <img
+            class="building-blocks"
+            src="{{ url_for('static', filename='images/trap.png') }}"
+            data-shape="trapezoid"
+          />
+          <!-- Add more shape images here -->
+        </div>
+      </div>
+      <div class="item">
+        <!-- Content for item 2 -->
+        <canvas id="canvas"></canvas>
+      </div>
+      <div class="item">
+        <!-- Content for item 3 -->
+      </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+  </body>
+</html>

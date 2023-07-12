@@ -6,7 +6,9 @@ import io
 
 app = Flask(__name__)
 root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
-cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json')
+
+cred = credentials.Certificate('./carewear-77d8e-b0c3a74e907c.json') 
+
 firebaseConfig = {
   "apiKey": "AIzaSyDyjHLuokjuGEPr3HOSsX8FP16qxyS62W8",
   "authDomain": "carewear-77d8e.firebaseapp.com",
@@ -25,4 +27,4 @@ ref = db.reference('/sensors_message')  # Path to your sensor data node in the d
 @app.route('/')
 def home():
  
-    return render_template("home.html")
+    return render_template("canvas.html")
