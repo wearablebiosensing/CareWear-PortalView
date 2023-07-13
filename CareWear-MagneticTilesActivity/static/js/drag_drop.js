@@ -1,11 +1,14 @@
 class Shape {
-  constructor(x, y, color) {
+  constructor(x, y, color, isLevelShape) {
     this.x = x;
     this.y = y;
     this.color = color;
     this.isDragging = false;
     this.startX = 0;
     this.startY = 0;
+    this.isLevelShape = isLevelShape; // Flag to indicate if it's a special shape
+    this.isLevelShapeFilled = false; //Flag to indicate if a level shape is already filled
+    this.isSnapped = false; // Flag to track if a shape is snapped to this target
   }
 
   draw() {
@@ -16,6 +19,8 @@ class Shape {
     // Abstract method - to be implemented in specific shape classes
     return false;
   }
+
+  snapToTargetShape(targetShape) {}
 
   mouseDown(x, y) {
     this.isDragging = true;
@@ -42,15 +47,42 @@ class Shape {
 }
 
 class Square extends Shape {
-  constructor(x, y, width, height, color) {
-    super(x, y, color);
+  constructor(x, y, width, height, color, isLevelShape = false) {
+    super(x, y, color, isLevelShape);
     this.width = width;
     this.height = height;
+    this.rotation = 0;
   }
 
   draw() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    // ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    //ctx.globalAlpha = this.isSnapped ? 0.5 : 1; //Adjust transparency;
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
+    //ctx.globalAlpha = 1; // Reset the global alpha value
+
+    ctx.save(); // Save the current transformation state
+    ctx.translate(this.x + this.width / 2, this.y + this.height / 2); // Translate the coordinate system to the center of the square
+    ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height); // Draw the square centered at the translated coordinates
+    ctx.restore(); // Restore the previous transformation state
+  }
+
+  snapToTargetShape(targetShape) {
+    if (targetShape instanceof Square) {
+      // Snap Square shape to target Square shape if they are close enough
+      const distanceThreshold = 40; // Adjust the threshold as needed
+      const distance = Math.sqrt(
+        Math.pow(this.x - targetShape.x, 2) +
+          Math.pow(this.y - targetShape.y, 2)
+      );
+      if (distance <= distanceThreshold) {
+        this.x = targetShape.x;
+        this.y = targetShape.y;
+        this.isSnapped = true;
+        targetShape.isLevelShapeFilled = true;
+      }
+    }
   }
 
   isPointInside(x, y) {
@@ -66,17 +98,34 @@ class Square extends Shape {
 }
 
 class Circle extends Shape {
-  constructor(x, y, radius, color) {
-    super(x, y, color);
+  constructor(x, y, radius, color, isLevelShape = false) {
+    super(x, y, color, isLevelShape);
     this.radius = radius;
   }
 
   draw() {
     ctx.beginPath();
-    ctx.fillStyle = this.color;
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
+  }
+
+  snapToTargetShape(targetShape) {
+    if (targetShape instanceof Circle) {
+      // Snap Circle shape to target Circle shape if they are close enough
+      const distanceThreshold = 40; // Adjust the threshold as needed
+      const distance = Math.sqrt(
+        Math.pow(this.x - targetShape.x, 2) +
+          Math.pow(this.y - targetShape.y, 2)
+      );
+      if (distance <= distanceThreshold) {
+        this.x = targetShape.x;
+        this.y = targetShape.y;
+        this.isSnapped = true;
+        targetShape.isLevelShapeFilled = true;
+      }
+    }
   }
 
   isPointInside(x, y) {
@@ -88,8 +137,8 @@ class Circle extends Shape {
 }
 
 class Trapezoid extends Shape {
-  constructor(x, y, base, height, color) {
-    super(x, y, color);
+  constructor(x, y, base, height, color, isLevelShape = false) {
+    super(x, y, color, isLevelShape);
     this.base = base;
     this.height = height;
     this.x1 = x + base * 0.25;
@@ -109,8 +158,46 @@ class Trapezoid extends Shape {
     ctx.lineTo(this.x3, this.y3);
     ctx.lineTo(this.x4, this.y4);
     ctx.closePath();
-    ctx.fillStyle = this.color;
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
     ctx.fill();
+  }
+
+  snapToTargetShape(targetShape) {
+    if (targetShape instanceof Trapezoid) {
+      // Snap Trapezoid shape to target Trapezoid shape if they are close enough
+      const distanceThreshold = 40; // Adjust the threshold as needed
+
+      // Calculate the distance between the centers of the trapezoids
+      const centerX = this.x + (this.x3 - this.x) / 2;
+      const centerY = this.y + (this.y3 - this.y) / 2;
+      const targetCenterX =
+        targetShape.x + (targetShape.x3 - targetShape.x) / 2;
+      const targetCenterY =
+        targetShape.y + (targetShape.y3 - targetShape.y) / 2;
+      const distance = Math.sqrt(
+        Math.pow(centerX - targetCenterX, 2) +
+          Math.pow(centerY - targetCenterY, 2)
+      );
+
+      if (distance <= distanceThreshold) {
+        // Snap the Trapezoid shape to the target Trapezoid shape
+        const dx = targetShape.x - this.x;
+        const dy = targetShape.y - this.y;
+        this.x += dx;
+        this.y += dy;
+        this.x1 += dx;
+        this.y1 += dy;
+        this.x2 += dx;
+        this.y2 += dy;
+        this.x3 += dx;
+        this.y3 += dy;
+        this.x4 += dx;
+        this.y4 += dy;
+
+        this.isSnapped = true;
+        targetShape.isLevelShapeFilled = true;
+      }
+    }
   }
 
   mouseMove(x, y) {
@@ -155,8 +242,8 @@ class Trapezoid extends Shape {
 }
 
 class RightTriangle extends Shape {
-  constructor(x, y, base, height, color) {
-    super(x, y, color);
+  constructor(x, y, base, height, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, isLevelShape);
     this.base = base;
     this.height = height;
     this.x1 = x;
@@ -165,27 +252,63 @@ class RightTriangle extends Shape {
     this.y2 = y;
     this.x3 = x;
     this.y3 = y + height;
-  }
-
-  rotate90() {
-    // Swap the base and height values
-    const temp = this.base;
-    this.base = this.height;
-    this.height = temp;
-
-    // Update the vertex coordinates accordingly
-    this.x2 = this.x1 + this.base;
-    this.y3 = this.y1 + this.height;
+    this.rotation = rotation;
   }
 
   draw() {
+    ctx.save(); // Save the current transformation state
+
+    ctx.translate(this.x + this.base / 2, this.y + this.height / 2); // Translate the coordinate system to the center of the right triangle
+    ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
+
     ctx.beginPath();
-    ctx.moveTo(this.x1, this.y1);
-    ctx.lineTo(this.x2, this.y2);
-    ctx.lineTo(this.x3, this.y3);
+    ctx.moveTo(-this.base / 2, -this.height / 2);
+    ctx.lineTo(this.base / 2, -this.height / 2);
+    ctx.lineTo(-this.base / 2, this.height / 2);
     ctx.closePath();
-    ctx.fillStyle = this.color;
+
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
     ctx.fill();
+
+    ctx.restore(); // Restore the previous transformation state
+  }
+
+  snapToTargetShape(targetShape) {
+    if (targetShape instanceof RightTriangle) {
+      if (this.rotation % 360 != targetShape.rotation % 360) return; //Have to be same rotation
+
+      // Snap RightTriangle shape to target RightTriangle shape if they are close enough
+      const distanceThreshold = 40; // Adjust the threshold as needed
+
+      // Calculate the distance between the centers of the triangles
+      const centerX = this.x + (this.x1 + this.x2) / 2;
+      const centerY = this.y + (this.y1 + this.y3) / 2;
+      const targetCenterX =
+        targetShape.x + (targetShape.x1 + targetShape.x2) / 2;
+      const targetCenterY =
+        targetShape.y + (targetShape.y1 + targetShape.y3) / 2;
+      const distance = Math.sqrt(
+        Math.pow(centerX - targetCenterX, 2) +
+          Math.pow(centerY - targetCenterY, 2)
+      );
+
+      if (distance <= distanceThreshold) {
+        // Snap the RightTriangle shape to the target RightTriangle shape
+        const dx = targetShape.x - this.x;
+        const dy = targetShape.y - this.y;
+        this.x += dx;
+        this.y += dy;
+        this.x1 += dx;
+        this.y1 += dy;
+        this.x2 += dx;
+        this.y2 += dy;
+        this.x3 += dx;
+        this.y3 += dy;
+
+        this.isSnapped = true;
+        targetShape.isLevelShapeFilled = true;
+      }
+    }
   }
 
   mouseMove(x, y) {
@@ -193,6 +316,8 @@ class RightTriangle extends Shape {
       const dx = x - this.startX;
       const dy = y - this.startY;
 
+      this.x += dx;
+      this.y += dy;
       this.x1 += dx;
       this.y1 += dy;
       this.x2 += dx;
@@ -239,10 +364,25 @@ canvas.height = 1000;
 const shapes = [];
 let current_shape_index = null;
 
-shapes.push(new Square(0, 0, 100, 100, "orange"));
-shapes.push(new Trapezoid(100, 200, 200, 100, "green"));
-shapes.push(new Circle(300, 200, 50, "red"));
-shapes.push(new RightTriangle(400, 300, 100, 100, "blue"));
+// shapes.push(new Square(0, 0, 100, 100, "orange"));
+// shapes.push(new Trapezoid(100, 200, 200, 100, "green"));
+// shapes.push(new Circle(300, 200, 50, "red"));
+// shapes.push(new RightTriangle(400, 300, 100, 100, "blue"));
+
+//====================================
+//              Levels
+//====================================
+const LEVEL_1 = [];
+
+LEVEL_1.push(new Square(400, 400, 100, 100, "grey", true)); // Right Middle
+LEVEL_1.push(new Square(400, 290, 100, 100, "grey", true)); //Left Middle
+LEVEL_1.push(new Square(290, 400, 100, 100, "grey", true)); //Top Square
+LEVEL_1.push(new Circle(450, 560, 50, "grey", true)); // Right Circle
+LEVEL_1.push(new Circle(340, 560, 50, "grey", true)); //Left Circle
+LEVEL_1.push(new RightTriangle(510, 400, 100, 100, "grey", -90, true)); // Right - Triangle
+LEVEL_1.push(new RightTriangle(180, 440, 100, 100, "grey", 180, true)); // Left - Triangle
+
+shapes.push(...LEVEL_1);
 
 //====================================
 //             Utils
@@ -343,13 +483,15 @@ function mouse_down(event) {
   // Check if the mouse is inside any shape
   for (let i = shapes.length - 1; i >= 0; i--) {
     const shape = shapes[i];
-    if (shape.isPointInside(x, y)) {
+
+    //Prevent level tiles & snapped shapes from being moved
+    if (shape.isPointInside(x, y) && !shape.isLevelShape && !shape.isSnapped) {
       console.log("Inside of a shape");
       current_shape_index = i;
       shape.mouseDown(x, y);
 
       // Move the shape to the top of the stack
-      //shapes.push(shapes.splice(i, 1)[0]);
+      shapes.push(shapes.splice(i, 1)[0]);
 
       break;
     }
@@ -362,13 +504,22 @@ function mouse_up(event) {
 
   if (current_shape_index === null) return;
 
-  shapes[current_shape_index].mouseUp();
+  const shape = shapes[current_shape_index];
+
+  shape.mouseUp();
   current_shape_index = null;
 }
 
 function mouse_move(event) {
   console.log("Mouse Move - ", event);
   if (current_shape_index === null) return;
+
+  const shape = shapes[current_shape_index];
+
+  for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
+    // Check if the shape is close enough to a special shape and snap it if true
+    shape.snapToTargetShape(targetShape);
+  }
 
   const { x, y } = calculateMousePos(event);
   shapes[current_shape_index].mouseMove(x, y);
@@ -390,5 +541,22 @@ function drawShapes() {
     shape.draw();
   }
 }
+
+//Testing
+
+function rotateCurrentShape() {
+  if (current_shape_index !== null) {
+    const shape = shapes[current_shape_index];
+    shape.rotation += 45; // Adjust the rotation angle as desired
+    drawShapes();
+  }
+}
+
+document.addEventListener("keydown", function (event) {
+  if (event.key === "r" || event.key === "R") {
+    rotateCurrentShape();
+    console.log("Rotated shape");
+  }
+});
 
 drawShapes();
