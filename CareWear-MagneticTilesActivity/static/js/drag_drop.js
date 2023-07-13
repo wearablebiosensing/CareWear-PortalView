@@ -9,6 +9,7 @@ class Shape {
     this.isLevelShape = isLevelShape; // Flag to indicate if it's a special shape
     this.isLevelShapeFilled = false; //Flag to indicate if a level shape is already filled
     this.isSnapped = false; // Flag to track if a shape is snapped to this target
+    this.snapDistanceThreshold = 20; //Flag to indicate how close a shape must be to Level shape to snap to it
   }
 
   draw() {
@@ -69,18 +70,21 @@ class Square extends Shape {
   }
 
   snapToTargetShape(targetShape) {
+    //Prevents an already filled tile shape from being use again
+    if (targetShape.isLevelShapeFilled) return;
+
     if (targetShape instanceof Square) {
       // Snap Square shape to target Square shape if they are close enough
-      const distanceThreshold = 40; // Adjust the threshold as needed
       const distance = Math.sqrt(
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
-      if (distance <= distanceThreshold) {
+      if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.isSnapped = true;
         targetShape.isLevelShapeFilled = true;
+        this.mouseUp();
       }
     }
   }
@@ -112,18 +116,22 @@ class Circle extends Shape {
   }
 
   snapToTargetShape(targetShape) {
+    //Prevents an already filled tile shape from being use again
+    if (targetShape.isLevelShapeFilled) return;
+
     if (targetShape instanceof Circle) {
       // Snap Circle shape to target Circle shape if they are close enough
-      const distanceThreshold = 40; // Adjust the threshold as needed
+
       const distance = Math.sqrt(
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
       );
-      if (distance <= distanceThreshold) {
+      if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
         this.isSnapped = true;
         targetShape.isLevelShapeFilled = true;
+        this.mouseUp();
       }
     }
   }
@@ -163,9 +171,11 @@ class Trapezoid extends Shape {
   }
 
   snapToTargetShape(targetShape) {
+    //Prevents an already filled tile shape from being use again
+    if (targetShape.isLevelShapeFilled) return;
+
     if (targetShape instanceof Trapezoid) {
       // Snap Trapezoid shape to target Trapezoid shape if they are close enough
-      const distanceThreshold = 40; // Adjust the threshold as needed
 
       // Calculate the distance between the centers of the trapezoids
       const centerX = this.x + (this.x3 - this.x) / 2;
@@ -179,7 +189,7 @@ class Trapezoid extends Shape {
           Math.pow(centerY - targetCenterY, 2)
       );
 
-      if (distance <= distanceThreshold) {
+      if (distance <= this.snapDistanceThreshold) {
         // Snap the Trapezoid shape to the target Trapezoid shape
         const dx = targetShape.x - this.x;
         const dy = targetShape.y - this.y;
@@ -196,6 +206,7 @@ class Trapezoid extends Shape {
 
         this.isSnapped = true;
         targetShape.isLevelShapeFilled = true;
+        this.mouseUp();
       }
     }
   }
@@ -274,11 +285,13 @@ class RightTriangle extends Shape {
   }
 
   snapToTargetShape(targetShape) {
+    //Prevents an already filled tile shape from being use again
+    if (targetShape.isLevelShapeFilled) return;
+
     if (targetShape instanceof RightTriangle) {
       if (this.rotation % 360 != targetShape.rotation % 360) return; //Have to be same rotation
 
       // Snap RightTriangle shape to target RightTriangle shape if they are close enough
-      const distanceThreshold = 40; // Adjust the threshold as needed
 
       // Calculate the distance between the centers of the triangles
       const centerX = this.x + (this.x1 + this.x2) / 2;
@@ -292,7 +305,7 @@ class RightTriangle extends Shape {
           Math.pow(centerY - targetCenterY, 2)
       );
 
-      if (distance <= distanceThreshold) {
+      if (distance <= this.snapDistanceThreshold) {
         // Snap the RightTriangle shape to the target RightTriangle shape
         const dx = targetShape.x - this.x;
         const dy = targetShape.y - this.y;
@@ -307,6 +320,7 @@ class RightTriangle extends Shape {
 
         this.isSnapped = true;
         targetShape.isLevelShapeFilled = true;
+        this.mouseUp();
       }
     }
   }
@@ -363,11 +377,9 @@ canvas.height = 1000;
 //====================================
 const shapes = [];
 let current_shape_index = null;
-
-// shapes.push(new Square(0, 0, 100, 100, "orange"));
-// shapes.push(new Trapezoid(100, 200, 200, 100, "green"));
-// shapes.push(new Circle(300, 200, 50, "red"));
-// shapes.push(new RightTriangle(400, 300, 100, 100, "blue"));
+let mouse_motion_array = [];
+let mouse_motion_accumulator = 0;
+const mouse_motion_collect_interval = 10;
 
 //====================================
 //              Levels
@@ -379,7 +391,7 @@ LEVEL_1.push(new Square(400, 290, 100, 100, "grey", true)); //Left Middle
 LEVEL_1.push(new Square(290, 400, 100, 100, "grey", true)); //Top Square
 LEVEL_1.push(new Circle(450, 560, 50, "grey", true)); // Right Circle
 LEVEL_1.push(new Circle(340, 560, 50, "grey", true)); //Left Circle
-LEVEL_1.push(new RightTriangle(510, 400, 100, 100, "grey", -90, true)); // Right - Triangle
+LEVEL_1.push(new RightTriangle(510, 400, 100, 100, "grey", 270, true)); // Right - Triangle
 LEVEL_1.push(new RightTriangle(180, 440, 100, 100, "grey", 180, true)); // Left - Triangle
 
 shapes.push(...LEVEL_1);
@@ -399,6 +411,21 @@ function calculateMousePos(evt) {
 }
 
 //====================================
+//        Collect mouse data
+//====================================
+document.ondragover = function (event) {
+  mouse_motion_accumulator += 1;
+
+  //Collect mouse data every interval set by global var
+  if (mouse_motion_accumulator % mouse_motion_collect_interval != 0) return;
+
+  if (mouse_motion_array.length > 0) {
+    console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
+    mouse_motion_array.push([event.clientX, event.clientY]);
+  }
+};
+
+//====================================
 //          Block Options
 //====================================
 const shapeContainer = document.getElementById("shapeContainer");
@@ -410,6 +437,9 @@ shapeContainer.addEventListener("mousedown", function (event) {
       offsetX: event.offsetX,
       offsetY: event.offsetY,
     };
+
+    console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
+    mouse_motion_array.push([event.clientX, event.clientY]);
 
     // Set the image element to be draggable
     event.target.draggable = true;
@@ -436,6 +466,11 @@ function dragStartHandler(event) {
 }
 
 function dragEndHandler(event) {
+  //Reset Motion
+  console.log("End of motion - ", mouse_motion_array);
+  mouse_motion_accumulator = 0;
+  mouse_motion_array = [];
+
   const { x, y } = calculateMousePos(event);
 
   // Check if the mouse is released over the canvas
@@ -451,13 +486,20 @@ function dragEndHandler(event) {
         100,
         "orange"
       );
-    } else if (shapeType === "trapezoid") {
-      newShape = new Trapezoid(
+    } else if (shapeType === "circle") {
+      newShape = new Circle(
         x - draggingImage.offsetX,
         y - draggingImage.offsetY,
-        200,
+        50,
+        "red"
+      );
+    } else if (shapeType === "rightTriangle") {
+      newShape = new RightTriangle(
+        x - draggingImage.offsetX,
+        y - draggingImage.offsetY,
         100,
-        "green"
+        100,
+        "blue"
       );
     }
 
@@ -476,7 +518,8 @@ function dragEndHandler(event) {
 //====================================
 function mouse_down(event) {
   event.preventDefault();
-  console.log("Mouse down - ", event);
+  // console.log("Mouse down - ", event);
+  console.log("Dragging Start Img - ", event.clientX, " , ", event.clientY);
 
   const { x, y } = calculateMousePos(event);
 
@@ -491,7 +534,7 @@ function mouse_down(event) {
       shape.mouseDown(x, y);
 
       // Move the shape to the top of the stack
-      shapes.push(shapes.splice(i, 1)[0]);
+      // shapes.push(shapes.splice(i, 1)[0]);
 
       break;
     }
@@ -511,7 +554,6 @@ function mouse_up(event) {
 }
 
 function mouse_move(event) {
-  console.log("Mouse Move - ", event);
   if (current_shape_index === null) return;
 
   const shape = shapes[current_shape_index];
