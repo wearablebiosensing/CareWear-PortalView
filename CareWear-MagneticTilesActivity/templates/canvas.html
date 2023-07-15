@@ -8,12 +8,17 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/global.css') }}"
     />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/drag.css') }}"
+    />
   </head>
   <body>
+    <h1 style="text-align: center">Level : 1</h1>
     <div class="container" id="container">
       <div class="item">
         <!-- Content for item 1 -->
-
+        <h1>Building Blocks</h1>
         <div id="shapeContainer">
           <img
             class="building-blocks"
@@ -35,11 +40,16 @@
       </div>
       <div class="item">
         <!-- Content for item 2 -->
+        <h1 style="text-align: center">Current Task</h1>
+
         <canvas id="canvas"></canvas>
       </div>
       <div class="item">
         <!-- Content for item 3 -->
       </div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-inner" id="progressBar"></div>
     </div>
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
   </body>

@@ -9,7 +9,7 @@ class Shape {
     this.isLevelShape = isLevelShape; // Flag to indicate if it's a special shape
     this.isLevelShapeFilled = false; //Flag to indicate if a level shape is already filled
     this.isSnapped = false; // Flag to track if a shape is snapped to this target
-    this.snapDistanceThreshold = 20; //Flag to indicate how close a shape must be to Level shape to snap to it
+    this.snapDistanceThreshold = 50; //Flag to indicate how close a shape must be to Level shape to snap to it
   }
 
   draw() {
@@ -375,6 +375,7 @@ canvas.height = 1000;
 //====================================
 //          Global Variables
 //====================================
+
 const shapes = [];
 let current_shape_index = null;
 let mouse_motion_array = [];
@@ -386,15 +387,44 @@ const mouse_motion_collect_interval = 10;
 //====================================
 const LEVEL_1 = [];
 
-LEVEL_1.push(new Square(400, 400, 100, 100, "grey", true)); // Right Middle
-LEVEL_1.push(new Square(400, 290, 100, 100, "grey", true)); //Left Middle
-LEVEL_1.push(new Square(290, 400, 100, 100, "grey", true)); //Top Square
-LEVEL_1.push(new Circle(450, 560, 50, "grey", true)); // Right Circle
-LEVEL_1.push(new Circle(340, 560, 50, "grey", true)); //Left Circle
-LEVEL_1.push(new RightTriangle(510, 400, 100, 100, "grey", 270, true)); // Right - Triangle
-LEVEL_1.push(new RightTriangle(180, 440, 100, 100, "grey", 180, true)); // Left - Triangle
+LEVEL_1.push(new Square(350, 400, 100, 100, "grey", true)); // Right Middle
+LEVEL_1.push(new Square(350, 290, 100, 100, "grey", true)); //Left Middle
+LEVEL_1.push(new Square(240, 400, 100, 100, "grey", true)); //Top Square
+LEVEL_1.push(new Circle(400, 560, 50, "grey", true)); // Right Circle
+LEVEL_1.push(new Circle(290, 560, 50, "grey", true)); //Left Circle
+LEVEL_1.push(new RightTriangle(460, 400, 100, 100, "grey", 270, true)); // Right - Triangle
+LEVEL_1.push(new RightTriangle(130, 440, 100, 100, "grey", 180, true)); // Left - Triangle
 
 shapes.push(...LEVEL_1);
+
+//====================================
+//          Progress Bar
+//====================================
+
+const progressBar = document.getElementById("progressBar");
+
+// Update the progress bar with a percentage value
+function updateProgressBar() {
+  percentage = getProgressBarPercentage();
+  console.log("Progress - ", percentage);
+  progressBar.style.width = percentage + "%";
+}
+
+function getProgressBarPercentage() {
+  const TOTAL_TILES_IN_LEVEL = LEVEL_1.length; //Change as needed
+  let level_tiles_filled = 0;
+
+  for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
+    if (targetShape.isLevelShapeFilled) level_tiles_filled += 1;
+  }
+
+  console.log(level_tiles_filled, " // ", TOTAL_TILES_IN_LEVEL);
+
+  let percent_level_complete =
+    (level_tiles_filled / TOTAL_TILES_IN_LEVEL) * 100;
+
+  return Math.round(percent_level_complete);
+}
 
 //====================================
 //             Utils
@@ -413,6 +443,25 @@ function calculateMousePos(evt) {
 //====================================
 //        Collect mouse data
 //====================================
+function getTimestamp() {
+  // Create a new Date object
+  const currentDate = new Date();
+
+  // Get the individual components of the current timestamp
+  const hours = currentDate.getHours().toString().padStart(2, "0");
+  const minutes = currentDate.getMinutes().toString().padStart(2, "0");
+  const seconds = currentDate.getSeconds().toString().padStart(2, "0");
+  const milliseconds = currentDate
+    .getMilliseconds()
+    .toString()
+    .padStart(3, "0");
+
+  // Format the timestamp
+  const formattedTimestamp = `${hours}:${minutes}:${seconds}:${milliseconds}`;
+
+  return formattedTimestamp;
+}
+
 document.ondragover = function (event) {
   mouse_motion_accumulator += 1;
 
@@ -421,14 +470,32 @@ document.ondragover = function (event) {
 
   if (mouse_motion_array.length > 0) {
     console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
-    mouse_motion_array.push([event.clientX, event.clientY]);
+    mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]);
   }
 };
+
+function postMouseMotionData() {
+  fetch("/process-mouse-data", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ data: mouse_motion_array }),
+  })
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));
+}
 
 //====================================
 //          Block Options
 //====================================
 const shapeContainer = document.getElementById("shapeContainer");
+const shapeImages = document.querySelectorAll(".building-blocks");
+
+// Prevent the default "no-drop" behavior on the canvas element
+canvas.addEventListener("dragover", (event) => {
+  event.preventDefault();
+});
 
 shapeContainer.addEventListener("mousedown", function (event) {
   if (event.target.tagName === "IMG") {
@@ -438,8 +505,7 @@ shapeContainer.addEventListener("mousedown", function (event) {
       offsetY: event.offsetY,
     };
 
-    console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
-    mouse_motion_array.push([event.clientX, event.clientY]);
+    mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]); //Start of mouse motion
 
     // Set the image element to be draggable
     event.target.draggable = true;
@@ -466,8 +532,9 @@ function dragStartHandler(event) {
 }
 
 function dragEndHandler(event) {
-  //Reset Motion
+  //Reset and Post Mouse Motion
   console.log("End of motion - ", mouse_motion_array);
+  postMouseMotionData();
   mouse_motion_accumulator = 0;
   mouse_motion_array = [];
 
@@ -487,12 +554,7 @@ function dragEndHandler(event) {
         "orange"
       );
     } else if (shapeType === "circle") {
-      newShape = new Circle(
-        x - draggingImage.offsetX,
-        y - draggingImage.offsetY,
-        50,
-        "red"
-      );
+      newShape = new Circle(x, y, 50, "red");
     } else if (shapeType === "rightTriangle") {
       newShape = new RightTriangle(
         x - draggingImage.offsetX,
@@ -507,6 +569,15 @@ function dragEndHandler(event) {
     shapes.push(newShape);
 
     // Redraw the canvas
+    drawShapes();
+
+    let shape = shapes[shapes.length - 1];
+    for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
+      // Check if the shape is close enough to a special shape and snap it if true
+      shape.snapToTargetShape(targetShape);
+      updateProgressBar();
+    }
+
     drawShapes();
   }
 
@@ -561,6 +632,7 @@ function mouse_move(event) {
   for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
+    updateProgressBar();
   }
 
   const { x, y } = calculateMousePos(event);
