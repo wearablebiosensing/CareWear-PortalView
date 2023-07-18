@@ -19,7 +19,7 @@
       <div class="item">
         <!-- Content for item 1 -->
         <h1>Building Blocks</h1>
-        <div id="shapeContainer">
+        <div id="shapeContainer1">
           <img
             class="building-blocks"
             src="{{ url_for('static', filename='images/square.png') }}"
@@ -38,7 +38,7 @@
           <!-- Add more shape images here -->
         </div>
       </div>
-      <div class="item">
+      <div class="item" style="outline: 1px solid rgb(0, 0, 0)">
         <!-- Content for item 2 -->
         <h1 style="text-align: center">Current Task</h1>
 
@@ -46,10 +46,33 @@
       </div>
       <div class="item">
         <!-- Content for item 3 -->
+        <div id="shapeContainer2">
+          <img
+            class="building-blocks"
+            src="{{ url_for('static', filename='images/square.png') }}"
+            data-shape="square"
+          />
+          <img
+            class="building-blocks"
+            src="{{ url_for('static', filename='images/circle.png') }}"
+            data-shape="circle"
+          />
+          <img
+            class="building-blocks"
+            src="{{ url_for('static', filename='images/rightTriangle.png') }}"
+            data-shape="rightTriangle"
+          />
+          <!-- Add more shape images here -->
+        </div>
       </div>
     </div>
-    <div class="progress-bar">
-      <div class="progress-bar-inner" id="progressBar"></div>
+
+    <!-- Progress Bar -->
+    <div class="progressBarWrapper">
+      <div class="progress-bar">
+        <p id="progress-bar-percent">0% complete</p>
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
     </div>
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
   </body>

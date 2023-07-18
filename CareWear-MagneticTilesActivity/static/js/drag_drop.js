@@ -1,8 +1,10 @@
 class Shape {
-  constructor(x, y, color, isLevelShape) {
+  constructor(x, y, color, rotation, isLevelShape) {
     this.x = x;
     this.y = y;
     this.color = color;
+    this.rotation = 0; //Maybe this.rotation = rotate(rotation)
+    this.rotate(rotation);
     this.isDragging = false;
     this.startX = 0;
     this.startY = 0;
@@ -12,16 +14,57 @@ class Shape {
     this.snapDistanceThreshold = 50; //Flag to indicate how close a shape must be to Level shape to snap to it
   }
 
+  rotate(degree) {
+    this.rotation = (this.rotation + degree) % 360;
+    if (this.rotation < 0) {
+      this.rotation += 360;
+    }
+  }
+
+  checkRotationThreshold(targetShape, equivalentRotations = [0]) {
+    const rotationDifference = Math.abs(this.rotation - targetShape.rotation);
+    const rotationThreshold = 15;
+
+    for (const angle of equivalentRotations) {
+      const difference = Math.abs(rotationDifference - angle);
+      const wrappedDifference = Math.abs(360 - difference);
+
+      if (
+        difference <= rotationThreshold ||
+        wrappedDifference <= rotationThreshold
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   draw() {
     // Abstract method - to be implemented in specific shape classes
   }
 
+  // Abstract method:
+  /*
+    Determines if a point(Users Mouse x,y) is within the shapes bounds
+  */
   isPointInside(x, y) {
-    // Abstract method - to be implemented in specific shape classes
     return false;
   }
 
+  //Checks to see if dragged shape and target shape
+  //are both instances of the same object, are within
+  //both a distance & rotation threshold
   snapToTargetShape(targetShape) {}
+
+  //A helper function that gets called if
+  //snapToTargetShape passes all conditions
+  snapUpdate(targetShape) {
+    this.isSnapped = true;
+    targetShape.isLevelShapeFilled = true;
+    this.rotation = targetShape.rotation;
+    this.mouseUp();
+  }
 
   mouseDown(x, y) {
     this.isDragging = true;
@@ -48,11 +91,10 @@ class Shape {
 }
 
 class Square extends Shape {
-  constructor(x, y, width, height, color, isLevelShape = false) {
-    super(x, y, color, isLevelShape);
+  constructor(x, y, width, height, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
     this.width = width;
     this.height = height;
-    this.rotation = 0;
   }
 
   draw() {
@@ -75,6 +117,10 @@ class Square extends Shape {
 
     if (targetShape instanceof Square) {
       // Snap Square shape to target Square shape if they are close enough
+
+      if (!this.checkRotationThreshold(targetShape, [0, 90, 180, 270, 360]))
+        return;
+
       const distance = Math.sqrt(
         Math.pow(this.x - targetShape.x, 2) +
           Math.pow(this.y - targetShape.y, 2)
@@ -82,9 +128,7 @@ class Square extends Shape {
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
-        this.isSnapped = true;
-        targetShape.isLevelShapeFilled = true;
-        this.mouseUp();
+        this.snapUpdate(targetShape);
       }
     }
   }
@@ -102,8 +146,8 @@ class Square extends Shape {
 }
 
 class Circle extends Shape {
-  constructor(x, y, radius, color, isLevelShape = false) {
-    super(x, y, color, isLevelShape);
+  constructor(x, y, radius, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
     this.radius = radius;
   }
 
@@ -129,9 +173,7 @@ class Circle extends Shape {
       if (distance <= this.snapDistanceThreshold) {
         this.x = targetShape.x;
         this.y = targetShape.y;
-        this.isSnapped = true;
-        targetShape.isLevelShapeFilled = true;
-        this.mouseUp();
+        this.snapUpdate(targetShape);
       }
     }
   }
@@ -145,68 +187,49 @@ class Circle extends Shape {
 }
 
 class Trapezoid extends Shape {
-  constructor(x, y, base, height, color, isLevelShape = false) {
-    super(x, y, color, isLevelShape);
+  constructor(x, y, base, height, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
     this.base = base;
     this.height = height;
-    this.x1 = x + base * 0.25;
-    this.y1 = y;
-    this.x2 = x + base * 0.75;
-    this.y2 = y;
-    this.x3 = x + base;
-    this.y3 = y + height;
-    this.x4 = x;
-    this.y4 = y + height;
   }
 
   draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate((Math.PI / 180) * this.rotation);
+
+    const topWidth = this.base; //*0.75
+    const bottomWidth = this.base * 0.5;
+    const halfHeight = this.height / 2;
+
     ctx.beginPath();
-    ctx.moveTo(this.x1, this.y1);
-    ctx.lineTo(this.x2, this.y2);
-    ctx.lineTo(this.x3, this.y3);
-    ctx.lineTo(this.x4, this.y4);
+    ctx.moveTo(-topWidth / 2, -halfHeight);
+    ctx.lineTo(topWidth / 2, -halfHeight);
+    ctx.lineTo(bottomWidth / 2, halfHeight);
+    ctx.lineTo(-bottomWidth / 2, halfHeight);
     ctx.closePath();
+
     ctx.fillStyle = this.isSnapped ? "green" : this.color;
     ctx.fill();
+
+    ctx.restore();
   }
 
   snapToTargetShape(targetShape) {
-    //Prevents an already filled tile shape from being use again
     if (targetShape.isLevelShapeFilled) return;
 
     if (targetShape instanceof Trapezoid) {
-      // Snap Trapezoid shape to target Trapezoid shape if they are close enough
+      // if (this.rotation % 360 !== targetShape.rotation % 360) return;
+      if (!this.checkRotationThreshold(targetShape)) return;
 
-      // Calculate the distance between the centers of the trapezoids
-      const centerX = this.x + (this.x3 - this.x) / 2;
-      const centerY = this.y + (this.y3 - this.y) / 2;
-      const targetCenterX =
-        targetShape.x + (targetShape.x3 - targetShape.x) / 2;
-      const targetCenterY =
-        targetShape.y + (targetShape.y3 - targetShape.y) / 2;
       const distance = Math.sqrt(
-        Math.pow(centerX - targetCenterX, 2) +
-          Math.pow(centerY - targetCenterY, 2)
+        Math.pow(this.x - targetShape.x, 2) +
+          Math.pow(this.y - targetShape.y, 2)
       );
-
       if (distance <= this.snapDistanceThreshold) {
-        // Snap the Trapezoid shape to the target Trapezoid shape
-        const dx = targetShape.x - this.x;
-        const dy = targetShape.y - this.y;
-        this.x += dx;
-        this.y += dy;
-        this.x1 += dx;
-        this.y1 += dy;
-        this.x2 += dx;
-        this.y2 += dy;
-        this.x3 += dx;
-        this.y3 += dy;
-        this.x4 += dx;
-        this.y4 += dy;
-
-        this.isSnapped = true;
-        targetShape.isLevelShapeFilled = true;
-        this.mouseUp();
+        this.x = targetShape.x;
+        this.y = targetShape.y;
+        this.snapUpdate(targetShape);
       }
     }
   }
@@ -218,43 +241,42 @@ class Trapezoid extends Shape {
 
       this.x += dx;
       this.y += dy;
-      this.x1 += dx;
-      this.y1 += dy;
-      this.x2 += dx;
-      this.y2 += dy;
-      this.x3 += dx;
-      this.y3 += dy;
-      this.x4 += dx;
-      this.y4 += dy;
-
       this.startX = x;
       this.startY = y;
     }
   }
 
   isPointInside(mouseX, mouseY) {
-    const { x, y, x2, y2, x3, y3, x4, y4 } = this;
+    const { x, y, base, height, rotation } = this;
+    const halfHeight = height / 2;
 
-    // Calculate the cross products of the vectors from the point to each pair of adjacent vertices
-    const crossProduct1 = (x2 - x) * (mouseY - y2) - (mouseX - x2) * (y2 - y);
-    const crossProduct2 = (x3 - x2) * (mouseY - y2) - (mouseX - x2) * (y3 - y2);
-    const crossProduct3 = (x4 - x3) * (mouseY - y3) - (mouseX - x3) * (y4 - y3);
-    const crossProduct4 = (x - x4) * (mouseY - y4) - (mouseX - x4) * (y - y4);
+    // Adjust mouse coordinates based on rotation and translation
+    const cosTheta = Math.cos((Math.PI / 180) * rotation);
+    const sinTheta = Math.sin((Math.PI / 180) * rotation);
+    const translatedX = mouseX - x;
+    const translatedY = mouseY - y;
+    const rotatedX = translatedX * cosTheta + translatedY * sinTheta;
+    const rotatedY = translatedY * cosTheta - translatedX * sinTheta;
 
-    // Check if the point is on the same side of all four sides of the trapezoid
-    const isInside =
-      crossProduct1 >= 0 &&
-      crossProduct2 >= 0 &&
-      crossProduct3 >= 0 &&
-      crossProduct4 >= 0;
+    // Calculate the boundaries of the trapezoid at the rotated position
+    const topWidth = base * 0.75;
+    const bottomWidth = base * 0.25;
+    const topBoundary = -halfHeight;
+    const bottomBoundary = halfHeight;
 
-    return isInside;
+    // Check if the point is within the boundaries
+    return (
+      rotatedY >= topBoundary &&
+      rotatedY <= bottomBoundary &&
+      rotatedX >= -topWidth / 2 &&
+      rotatedX <= topWidth / 2
+    );
   }
 }
 
 class RightTriangle extends Shape {
   constructor(x, y, base, height, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, isLevelShape);
+    super(x, y, color, rotation, isLevelShape);
     this.base = base;
     this.height = height;
     this.x1 = x;
@@ -263,7 +285,6 @@ class RightTriangle extends Shape {
     this.y2 = y;
     this.x3 = x;
     this.y3 = y + height;
-    this.rotation = rotation;
   }
 
   draw() {
@@ -289,7 +310,7 @@ class RightTriangle extends Shape {
     if (targetShape.isLevelShapeFilled) return;
 
     if (targetShape instanceof RightTriangle) {
-      if (this.rotation % 360 != targetShape.rotation % 360) return; //Have to be same rotation
+      if (!this.checkRotationThreshold(targetShape)) return;
 
       // Snap RightTriangle shape to target RightTriangle shape if they are close enough
 
@@ -318,9 +339,7 @@ class RightTriangle extends Shape {
         this.x3 += dx;
         this.y3 += dy;
 
-        this.isSnapped = true;
-        targetShape.isLevelShapeFilled = true;
-        this.mouseUp();
+        this.snapUpdate(targetShape);
       }
     }
   }
@@ -364,6 +383,412 @@ class RightTriangle extends Shape {
   }
 }
 
+class Diamond extends Shape {
+  constructor(x, y, width, height, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
+    this.width = width;
+    this.height = height;
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+    ctx.rotate((Math.PI / 180) * this.rotation);
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.beginPath();
+    ctx.moveTo(-this.width / 2, 0);
+    ctx.lineTo(0, -this.height / 2);
+    ctx.lineTo(this.width / 2, 0);
+    ctx.lineTo(0, this.height / 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  snapToTargetShape(targetShape) {
+    if (targetShape.isLevelShapeFilled) return;
+
+    if (targetShape instanceof Diamond) {
+      //Since There are two different diamond shapes
+      if (this.width != targetShape.width) return;
+
+      // const equivalentRotations = [0, 90, 180, 270];
+      if (!this.checkRotationThreshold(targetShape, [0, 180])) return;
+
+      const distance = Math.sqrt(
+        Math.pow(this.x - targetShape.x, 2) +
+          Math.pow(this.y - targetShape.y, 2)
+      );
+      if (distance <= this.snapDistanceThreshold) {
+        this.x = targetShape.x;
+        this.y = targetShape.y;
+        this.snapUpdate(targetShape);
+      }
+    }
+  }
+
+  isPointInside(x, y) {
+    const centerX = this.x + this.width / 2;
+    const centerY = this.y + this.height / 2;
+
+    // Adjust the point coordinates based on rotation and center of the diamond
+    const rotatedX =
+      Math.cos((this.rotation * Math.PI) / 180) * (x - centerX) -
+      Math.sin((this.rotation * Math.PI) / 180) * (y - centerY);
+    const rotatedY =
+      Math.sin((this.rotation * Math.PI) / 180) * (x - centerX) +
+      Math.cos((this.rotation * Math.PI) / 180) * (y - centerY);
+
+    // Check if the adjusted point is inside the diamond
+    return (
+      Math.abs(rotatedX) / (this.width / 2) +
+        Math.abs(rotatedY) / (this.height / 2) <=
+      1
+    );
+  }
+}
+
+class EquilateralTriangle extends Shape {
+  constructor(x, y, sideLength, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
+    this.sideLength = sideLength;
+    this.height = (Math.sqrt(3) / 2) * sideLength;
+    this.x1 = x - sideLength / 2;
+    this.y1 = y + (Math.sqrt(3) / 6) * sideLength;
+    this.x2 = x + sideLength / 2;
+    this.y2 = y + (Math.sqrt(3) / 6) * sideLength;
+    this.x3 = x;
+    this.y3 = y - (Math.sqrt(3) / 3) * sideLength;
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate((Math.PI / 180) * this.rotation);
+
+    ctx.beginPath();
+    ctx.moveTo(-this.sideLength / 2, (Math.sqrt(3) / 6) * this.sideLength);
+    ctx.lineTo(this.sideLength / 2, (Math.sqrt(3) / 6) * this.sideLength);
+    ctx.lineTo(0, -(Math.sqrt(3) / 3) * this.sideLength);
+    ctx.closePath();
+
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  snapToTargetShape(targetShape) {
+    // Prevents an already filled tile shape from being used again
+    if (targetShape.isLevelShapeFilled) return;
+
+    if (targetShape instanceof EquilateralTriangle) {
+      if (!this.checkRotationThreshold(targetShape, [0, 120, 240])) return;
+
+      // Snap EquilateralTriangle shape to target EquilateralTriangle shape if they are close enough
+
+      // Calculate the distance between the centers of the triangles
+      const centerX = this.x;
+      const centerY = this.y - (Math.sqrt(3) / 6) * this.sideLength;
+      const targetCenterX = targetShape.x;
+      const targetCenterY =
+        targetShape.y - (Math.sqrt(3) / 6) * targetShape.sideLength;
+      const distance = Math.sqrt(
+        Math.pow(centerX - targetCenterX, 2) +
+          Math.pow(centerY - targetCenterY, 2)
+      );
+
+      if (distance <= this.snapDistanceThreshold) {
+        // Snap the EquilateralTriangle shape to the target EquilateralTriangle shape
+        const dx = targetShape.x - this.x;
+        const dy = targetShape.y - this.y;
+        this.x += dx;
+        this.y += dy;
+        this.x1 += dx;
+        this.y1 += dy;
+        this.x2 += dx;
+        this.y2 += dy;
+        this.x3 += dx;
+        this.y3 += dy;
+
+        this.snapUpdate(targetShape);
+      }
+    }
+  }
+
+  mouseMove(x, y) {
+    if (this.isDragging) {
+      const dx = x - this.startX;
+      const dy = y - this.startY;
+
+      this.x += dx;
+      this.y += dy;
+      this.x1 += dx;
+      this.y1 += dy;
+      this.x2 += dx;
+      this.y2 += dy;
+      this.x3 += dx;
+      this.y3 += dy;
+
+      this.startX = x;
+      this.startY = y;
+    }
+  }
+
+  dotProduct(v1, v2) {
+    return v1[0] * v2[0] + v1[1] * v2[1];
+  }
+
+  isPointInside(mouseX, mouseY) {
+    const { x1, y1, x2, y2, x3, y3 } = this;
+
+    const v0 = [x3 - x1, y3 - y1];
+    const v1 = [x2 - x1, y2 - y1];
+    const v2 = [mouseX - x1, mouseY - y1];
+
+    const dot00 = this.dotProduct(v0, v0);
+    const dot01 = this.dotProduct(v0, v1);
+    const dot02 = this.dotProduct(v0, v2);
+    const dot11 = this.dotProduct(v1, v1);
+    const dot12 = this.dotProduct(v1, v2);
+
+    const invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+    const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+    return u >= 0 && v >= 0 && u + v < 1;
+  }
+}
+
+class Hexagon extends Shape {
+  constructor(x, y, sideLength, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
+    this.sideLength = sideLength;
+    this.radius = (sideLength * Math.sqrt(3)) / 2;
+  }
+
+  draw() {
+    ctx.save(); // Save the current transformation state
+    ctx.translate(this.x, this.y); // Translate the coordinate system to the center of the hexagon
+    ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
+
+    ctx.beginPath();
+    ctx.moveTo(this.radius, 0);
+    for (let i = 1; i <= 6; i++) {
+      const angle = (Math.PI / 180) * (60 * i);
+      const x = this.radius * Math.cos(angle);
+      const y = this.radius * Math.sin(angle);
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fill();
+
+    ctx.restore(); // Restore the previous transformation state
+  }
+
+  snapToTargetShape(targetShape) {
+    // Prevents an already filled tile shape from being used again
+    if (targetShape.isLevelShapeFilled) return;
+
+    if (targetShape instanceof Hexagon) {
+      // Snap Hexagon shape to target Hexagon shape if they are close enough
+
+      if (
+        !this.checkRotationThreshold(
+          targetShape,
+          [0, 60, 120, 180, 240, 300, 360]
+        )
+      )
+        return;
+
+      const distance = Math.sqrt(
+        Math.pow(this.x - targetShape.x, 2) +
+          Math.pow(this.y - targetShape.y, 2)
+      );
+      if (distance <= this.snapDistanceThreshold) {
+        this.x = targetShape.x;
+        this.y = targetShape.y;
+        this.snapUpdate(targetShape);
+      }
+    }
+  }
+
+  isPointInside(x, y) {
+    // Check if the point is inside the bounding rectangle of the hexagon
+    if (
+      x > this.x - this.radius &&
+      x < this.x + this.radius &&
+      y > this.y - this.radius &&
+      y < this.y + this.radius
+    ) {
+      const localX = x - this.x;
+      const localY = y - this.y;
+
+      // Convert to axial coordinates
+      const q = ((2 / 3) * localX) / this.radius;
+      const r =
+        ((-1 / 3) * localX) / this.radius +
+        ((Math.sqrt(3) / 3) * localY) / this.radius;
+
+      // Check if the point is inside the hexagon using axial coordinates
+      if (Math.abs(q) <= 1 && Math.abs(r) <= 1 && Math.abs(q + r) <= 1) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+}
+
+class QuarterCircle extends Shape {
+  constructor(x, y, radius, color, rotation = 0, isLevelShape = false) {
+    super(x, y, color, rotation, isLevelShape);
+    this.radius = radius;
+  }
+
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate((Math.PI / 180) * this.rotation);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, Math.PI / 2, false);
+    ctx.lineTo(0, 0);
+    ctx.closePath();
+
+    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  snapToTargetShape(targetShape) {
+    if (targetShape.isLevelShapeFilled) return;
+
+    if (targetShape instanceof QuarterCircle) {
+      if (this.rotation % 360 != targetShape.rotation % 360) return; // Have to be the same rotation
+
+      const distance = Math.sqrt(
+        Math.pow(this.x - targetShape.x, 2) +
+          Math.pow(this.y - targetShape.y, 2)
+      );
+      if (distance <= this.snapDistanceThreshold) {
+        this.x = targetShape.x;
+        this.y = targetShape.y;
+        this.snapUpdate(targetShape);
+      }
+    }
+  }
+
+  isPointInside(x, y) {
+    const centerX = this.x;
+    const centerY = this.y;
+    const adjustedX =
+      (x - centerX) * Math.cos((Math.PI / 180) * -this.rotation) -
+      (y - centerY) * Math.sin((Math.PI / 180) * -this.rotation);
+    const adjustedY =
+      (x - centerX) * Math.sin((Math.PI / 180) * -this.rotation) +
+      (y - centerY) * Math.cos((Math.PI / 180) * -this.rotation);
+
+    // Calculate the distance between the adjusted point and the center of the rotated quarter circle
+    const distance = Math.sqrt(Math.pow(adjustedX, 2) + Math.pow(adjustedY, 2));
+
+    // Check if the distance is within the radius of the quarter circle
+    // and if the point is within the visible area of the quarter circle
+    return (
+      distance <= this.radius &&
+      adjustedX >= 0 &&
+      adjustedY >= 0 &&
+      adjustedX <= this.radius &&
+      adjustedY <= this.radius
+    );
+  }
+}
+
+//====================================
+//          Shape Factory's
+//====================================
+/*We need these functions becuase we use the same shape
+class for mulipes different shapes and it just makes it easier*/
+
+function OrangeSquare(x, y, rotation = 0, isLevelTile = false) {
+  const SQUARE_SIZE = 100;
+  let color = isLevelTile ? "grey" : "#ffc061";
+  return new Square(
+    x,
+    y,
+    SQUARE_SIZE,
+    SQUARE_SIZE,
+    color,
+    rotation,
+    isLevelTile
+  );
+}
+
+function RedCircle(x, y, rotation = 0, isLevelTile = false) {
+  const CIRCLE_RADIUS = 50;
+  let color = isLevelTile ? "grey" : "#F29595";
+  return new Circle(x, y, CIRCLE_RADIUS, color, rotation, isLevelTile);
+}
+
+function BlueRightTriangle(x, y, rotation = 0, isLevelTile = false) {
+  const BASE = 100;
+  const HEIGHT = 100;
+  let color = isLevelTile ? "grey" : "#90C0FF";
+  return new RightTriangle(x, y, BASE, HEIGHT, color, rotation, isLevelTile);
+}
+
+function GreenTrapezoid(x, y, rotation = 0, isLevelTile = false) {
+  const BASE = 200;
+  const HEIGHT = 100;
+  let color = isLevelTile ? "grey" : "#61a962";
+  return new Trapezoid(x, y, BASE, HEIGHT, color, rotation, isLevelTile);
+}
+
+function GreenEquilateralTriangle(x, y, rotation = 0, isLevelTile = false) {
+  const SIDE_LENGTH = 100;
+  let color = isLevelTile ? "grey" : "#a1e87e";
+  return new EquilateralTriangle(
+    x,
+    y,
+    SIDE_LENGTH,
+    color,
+    rotation,
+    isLevelTile
+  );
+}
+
+function BlueHexagon(x, y, rotation = 0, isLevelTile = false) {
+  const SIDE_LENGTH = 100;
+  let color = isLevelTile ? "grey" : "#1184e2";
+
+  return new Hexagon(x, y, SIDE_LENGTH, color, rotation, isLevelTile);
+}
+
+function YellowDiamond(x, y, rotation = 0, isLevelTile = false) {
+  const WIDTH = 70;
+  const HEIGHT = 200;
+  let color = isLevelTile ? "grey" : "#FFCC4D";
+
+  return new Diamond(x, y, WIDTH, HEIGHT, color, rotation, isLevelTile);
+}
+
+function PurpleDiamond(x, y, rotation = 0, isLevelTile = false) {
+  const WIDTH = 100;
+  const HEIGHT = 200;
+  let color = isLevelTile ? "grey" : "#9F9AFF";
+
+  return new Diamond(x, y, WIDTH, HEIGHT, color, rotation, isLevelTile);
+}
+
+function PinkQuarterCircle(x, y, rotation = 0, isLevelTile = false) {
+  const RADIUS = 100;
+  let color = isLevelTile ? "grey" : "#f5a8f3";
+  return new QuarterCircle(x, y, RADIUS, color, rotation, isLevelTile);
+}
+
 //====================================
 //          Canvas Settings
 //====================================
@@ -372,11 +797,18 @@ const ctx = canvas.getContext("2d");
 canvas.width = 700;
 canvas.height = 1000;
 
+//TODO
+// Drag shapes on both sides of canvas
+// Randomize the shapes location on both sides
+// Add percertage text
+
 //====================================
 //          Global Variables
 //====================================
 
 const shapes = [];
+let current_level = 1;
+let current_sub_level = 1;
 let current_shape_index = null;
 let mouse_motion_array = [];
 let mouse_motion_accumulator = 0;
@@ -385,23 +817,55 @@ const mouse_motion_collect_interval = 10;
 //====================================
 //              Levels
 //====================================
-const LEVEL_1 = [];
 
-LEVEL_1.push(new Square(350, 400, 100, 100, "grey", true)); // Right Middle
-LEVEL_1.push(new Square(350, 290, 100, 100, "grey", true)); //Left Middle
-LEVEL_1.push(new Square(240, 400, 100, 100, "grey", true)); //Top Square
-LEVEL_1.push(new Circle(400, 560, 50, "grey", true)); // Right Circle
-LEVEL_1.push(new Circle(290, 560, 50, "grey", true)); //Left Circle
-LEVEL_1.push(new RightTriangle(460, 400, 100, 100, "grey", 270, true)); // Right - Triangle
-LEVEL_1.push(new RightTriangle(130, 440, 100, 100, "grey", 180, true)); // Left - Triangle
+const LEVELS = {
+  1: {
+    1: [
+      OrangeSquare(350, 400, 0, true), // Right Middle
+      OrangeSquare(350, 290, 0, true), //Left Middle
+      OrangeSquare(240, 400, 0, true), //Top Square
+      RedCircle(400, 560, 0, true), // Right Circle
+      RedCircle(290, 560, 0, true), //Left Circle
+      BlueRightTriangle(460, 400, 270, true), // Right - Triangle
+      BlueRightTriangle(130, 440, 180, true), // Left - Triangle],
+    ],
+    2: [],
+    3: [],
+  },
+  2: {
+    1: [
+      OrangeSquare(300, 100, 0, true), // Head
+      BlueHexagon(350, 280, 0, true), //Body
+      GreenTrapezoid(350, 410, 180, true),
+      GreenTrapezoid(350, 515, 0, true),
+      GreenEquilateralTriangle(350, 600, 180, true), //Stinger
+      YellowDiamond(130, 120, 110, true), //Left Top Wing
+      YellowDiamond(130, 230, 75, true), //Left Bottom Wing
+      YellowDiamond(500, 120, 75, true), //R Top Wing
+      YellowDiamond(500, 230, 110, true), //R Bottom Wing
+    ],
+  },
+  3: {},
+};
 
-shapes.push(...LEVEL_1);
+shapes.push(...LEVELS[current_level][current_sub_level]);
+
+shapes.push(RedCircle(100, 20));
+shapes.push(OrangeSquare(200, 20));
+shapes.push(BlueRightTriangle(200, 50));
+shapes.push(GreenEquilateralTriangle(200, 50));
+shapes.push(BlueHexagon(200, 80));
+shapes.push(YellowDiamond(200, 80));
+shapes.push(PurpleDiamond(200, 100));
+shapes.push(GreenTrapezoid(100, 100));
+shapes.push(PinkQuarterCircle(200, 350));
 
 //====================================
 //          Progress Bar
 //====================================
 
 const progressBar = document.getElementById("progressBar");
+const progressBarPercent = document.getElementById("progress-bar-percent");
 
 // Update the progress bar with a percentage value
 function updateProgressBar() {
@@ -411,19 +875,23 @@ function updateProgressBar() {
 }
 
 function getProgressBarPercentage() {
-  const TOTAL_TILES_IN_LEVEL = LEVEL_1.length; //Change as needed
+  const TOTAL_TILES_IN_LEVEL = LEVELS[current_level][current_sub_level].length; //Change as needed
   let level_tiles_filled = 0;
 
   for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
     if (targetShape.isLevelShapeFilled) level_tiles_filled += 1;
   }
 
-  console.log(level_tiles_filled, " // ", TOTAL_TILES_IN_LEVEL);
+  // console.log(level_tiles_filled, " // ", TOTAL_TILES_IN_LEVEL);
 
-  let percent_level_complete =
-    (level_tiles_filled / TOTAL_TILES_IN_LEVEL) * 100;
+  let percent_level_complete = Math.round(
+    (level_tiles_filled / TOTAL_TILES_IN_LEVEL) * 100
+  );
 
-  return Math.round(percent_level_complete);
+  //Set percentage text
+  progressBarPercent.innerText = `${percent_level_complete}% complete`;
+
+  return percent_level_complete;
 }
 
 //====================================
@@ -489,7 +957,9 @@ function postMouseMotionData() {
 //====================================
 //          Block Options
 //====================================
-const shapeContainer = document.getElementById("shapeContainer");
+const shapeContainer1 = document.getElementById("shapeContainer1");
+const shapeContainer2 = document.getElementById("shapeContainer2");
+
 const shapeImages = document.querySelectorAll(".building-blocks");
 
 // Prevent the default "no-drop" behavior on the canvas element
@@ -497,7 +967,11 @@ canvas.addEventListener("dragover", (event) => {
   event.preventDefault();
 });
 
-shapeContainer.addEventListener("mousedown", function (event) {
+[shapeContainer1, shapeContainer2].forEach((container) => {
+  container.addEventListener("mousedown", shapeContainerMouseDown);
+});
+
+function shapeContainerMouseDown(event) {
   if (event.target.tagName === "IMG") {
     draggingImage = {
       image: event.target,
@@ -514,7 +988,7 @@ shapeContainer.addEventListener("mousedown", function (event) {
     event.target.addEventListener("dragstart", dragStartHandler);
     event.target.addEventListener("dragend", dragEndHandler);
   }
-});
+}
 
 function dragStartHandler(event) {
   draggingImage = {
@@ -658,17 +1132,27 @@ function drawShapes() {
 
 //Testing
 
-function rotateCurrentShape() {
+function rotateCurrentShape(deg) {
   if (current_shape_index !== null) {
     const shape = shapes[current_shape_index];
-    shape.rotation += 45; // Adjust the rotation angle as desired
+
+    //Prevents rotation when shape is snapped into place
+    if (!shape.isDragging) return;
+
+    shape.rotate(deg); // Adjust the rotation angle as desired
+    console.log("Shape rotation - ", shape.rotation);
     drawShapes();
   }
 }
 
 document.addEventListener("keydown", function (event) {
   if (event.key === "r" || event.key === "R") {
-    rotateCurrentShape();
+    rotateCurrentShape(5);
+    console.log("Rotated shape");
+  }
+
+  if (event.key === "e" || event.key === "E") {
+    rotateCurrentShape(-5);
     console.log("Rotated shape");
   }
 });
