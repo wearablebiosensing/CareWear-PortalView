@@ -1,5 +1,5 @@
 class Shape {
-  constructor(x, y, color, rotation, isLevelShape) {
+  constructor(x, y, color, rotation, isLevelShape, isBuildingBlock = false) {
     this.x = x;
     this.y = y;
     this.color = color;
@@ -12,6 +12,8 @@ class Shape {
     this.isLevelShapeFilled = false; //Flag to indicate if a level shape is already filled
     this.isSnapped = false; // Flag to track if a shape is snapped to this target
     this.snapDistanceThreshold = 50; //Flag to indicate how close a shape must be to Level shape to snap to it
+
+    this.isBuildingBlock = isBuildingBlock;
   }
 
   rotate(degree) {
@@ -38,6 +40,10 @@ class Shape {
     }
 
     return false;
+  }
+
+  createShapeFromBlock() {
+    // Abstract method - to be implemented in specific shape classes
   }
 
   draw() {
@@ -91,10 +97,25 @@ class Shape {
 }
 
 class Square extends Shape {
-  constructor(x, y, width, height, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    width,
+    height,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.width = width;
     this.height = height;
+    this.type = "Square";
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return OrangeSquare(this.x, this.y);
   }
 
   draw() {
@@ -146,9 +167,25 @@ class Square extends Shape {
 }
 
 class Circle extends Shape {
-  constructor(x, y, radius, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    radius,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(
+      x + radius, //So that Circle is drawn from top left instead of center
+      y + radius,
+      color,
+      rotation,
+      isLevelShape,
+      isBuildingBlock
+    );
     this.radius = radius;
+    this.type = "Circle";
   }
 
   draw() {
@@ -157,6 +194,12 @@ class Circle extends Shape {
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    console.log("Red");
+    return RedCircle(this.x - this.radius, this.y - this.radius);
   }
 
   snapToTargetShape(targetShape) {
@@ -187,10 +230,27 @@ class Circle extends Shape {
 }
 
 class Trapezoid extends Shape {
-  constructor(x, y, base, height, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    base,
+    height,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(
+      x + base / 2,
+      y + height / 2,
+      color,
+      rotation,
+      isLevelShape,
+      isBuildingBlock
+    );
     this.base = base;
     this.height = height;
+    this.type = "Trapezoid";
   }
 
   draw() {
@@ -213,6 +273,11 @@ class Trapezoid extends Shape {
     ctx.fill();
 
     ctx.restore();
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return GreenTrapezoid(this.x - this.base / 2, this.y - this.height / 2);
   }
 
   snapToTargetShape(targetShape) {
@@ -275,8 +340,17 @@ class Trapezoid extends Shape {
 }
 
 class RightTriangle extends Shape {
-  constructor(x, y, base, height, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    base,
+    height,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.base = base;
     this.height = height;
     this.x1 = x;
@@ -285,6 +359,7 @@ class RightTriangle extends Shape {
     this.y2 = y;
     this.x3 = x;
     this.y3 = y + height;
+    this.type = "Right Triangle";
   }
 
   draw() {
@@ -303,6 +378,11 @@ class RightTriangle extends Shape {
     ctx.fill();
 
     ctx.restore(); // Restore the previous transformation state
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return BlueRightTriangle(this.x, this.y);
   }
 
   snapToTargetShape(targetShape) {
@@ -384,10 +464,21 @@ class RightTriangle extends Shape {
 }
 
 class Diamond extends Shape {
-  constructor(x, y, width, height, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    width,
+    height,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false,
+    type = null
+  ) {
+    super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.width = width;
     this.height = height;
+    this.type = type == "yellow" ? "Yellow Diamond" : "Purple Diamond"; //String to determined if it is the yellow or purple diamond
   }
 
   draw() {
@@ -403,6 +494,14 @@ class Diamond extends Shape {
     ctx.closePath();
     ctx.fill();
     ctx.restore();
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return this.type == "Yellow Diamond"
+      ? YellowDiamond(this.x, this.y, 90)
+      : PurpleDiamond(this.x, this.y, 90);
+    _;
   }
 
   snapToTargetShape(targetShape) {
@@ -449,8 +548,16 @@ class Diamond extends Shape {
 }
 
 class EquilateralTriangle extends Shape {
-  constructor(x, y, sideLength, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    sideLength,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.sideLength = sideLength;
     this.height = (Math.sqrt(3) / 2) * sideLength;
     this.x1 = x - sideLength / 2;
@@ -459,6 +566,7 @@ class EquilateralTriangle extends Shape {
     this.y2 = y + (Math.sqrt(3) / 6) * sideLength;
     this.x3 = x;
     this.y3 = y - (Math.sqrt(3) / 3) * sideLength;
+    this.type = "Equilateral Triangle";
   }
 
   draw() {
@@ -476,6 +584,11 @@ class EquilateralTriangle extends Shape {
     ctx.fill();
 
     ctx.restore();
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return GreenEquilateralTriangle(this.x, this.y);
   }
 
   snapToTargetShape(targetShape) {
@@ -561,10 +674,19 @@ class EquilateralTriangle extends Shape {
 }
 
 class Hexagon extends Shape {
-  constructor(x, y, sideLength, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    sideLength,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.sideLength = sideLength;
     this.radius = (sideLength * Math.sqrt(3)) / 2;
+    this.type = "Hexagon";
   }
 
   draw() {
@@ -586,6 +708,11 @@ class Hexagon extends Shape {
     ctx.fill();
 
     ctx.restore(); // Restore the previous transformation state
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return BlueHexagon(this.x, this.y);
   }
 
   snapToTargetShape(targetShape) {
@@ -643,9 +770,18 @@ class Hexagon extends Shape {
 }
 
 class QuarterCircle extends Shape {
-  constructor(x, y, radius, color, rotation = 0, isLevelShape = false) {
-    super(x, y, color, rotation, isLevelShape);
+  constructor(
+    x,
+    y,
+    radius,
+    color,
+    rotation = 0,
+    isLevelShape = false,
+    isBuildingBlock = false
+  ) {
+    super(x, y, color, rotation, isLevelShape, isBuildingBlock);
     this.radius = radius;
+    this.type = "Quarter Circle";
   }
 
   draw() {
@@ -662,6 +798,11 @@ class QuarterCircle extends Shape {
     ctx.fill();
 
     ctx.restore();
+  }
+
+  createShapeFromBlock() {
+    if (!this.isBuildingBlock) return;
+    return PinkQuarterCircle(this.x, this.y);
   }
 
   snapToTargetShape(targetShape) {
@@ -713,7 +854,13 @@ class QuarterCircle extends Shape {
 /*We need these functions becuase we use the same shape
 class for mulipes different shapes and it just makes it easier*/
 
-function OrangeSquare(x, y, rotation = 0, isLevelTile = false) {
+function OrangeSquare(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const SQUARE_SIZE = 100;
   let color = isLevelTile ? "grey" : "#ffc061";
   return new Square(
@@ -723,32 +870,83 @@ function OrangeSquare(x, y, rotation = 0, isLevelTile = false) {
     SQUARE_SIZE,
     color,
     rotation,
-    isLevelTile
+    isLevelTile,
+    isBuildingBlock
   );
 }
 
-function RedCircle(x, y, rotation = 0, isLevelTile = false) {
+function RedCircle(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const CIRCLE_RADIUS = 50;
   let color = isLevelTile ? "grey" : "#F29595";
-  return new Circle(x, y, CIRCLE_RADIUS, color, rotation, isLevelTile);
+  return new Circle(
+    x,
+    y,
+    CIRCLE_RADIUS,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock
+  );
 }
 
-function BlueRightTriangle(x, y, rotation = 0, isLevelTile = false) {
+function BlueRightTriangle(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const BASE = 100;
   const HEIGHT = 100;
   let color = isLevelTile ? "grey" : "#90C0FF";
-  return new RightTriangle(x, y, BASE, HEIGHT, color, rotation, isLevelTile);
+  return new RightTriangle(
+    x,
+    y,
+    BASE,
+    HEIGHT,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock
+  );
 }
 
-function GreenTrapezoid(x, y, rotation = 0, isLevelTile = false) {
+function GreenTrapezoid(
+  x,
+  y,
+  rotation = 180,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const BASE = 200;
   const HEIGHT = 100;
   let color = isLevelTile ? "grey" : "#61a962";
-  return new Trapezoid(x, y, BASE, HEIGHT, color, rotation, isLevelTile);
+  return new Trapezoid(
+    x,
+    y,
+    BASE,
+    HEIGHT,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock
+  );
 }
 
-function GreenEquilateralTriangle(x, y, rotation = 0, isLevelTile = false) {
-  const SIDE_LENGTH = 100;
+function GreenEquilateralTriangle(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
+  const SIDE_LENGTH = 95;
   let color = isLevelTile ? "grey" : "#a1e87e";
   return new EquilateralTriangle(
     x,
@@ -756,37 +954,98 @@ function GreenEquilateralTriangle(x, y, rotation = 0, isLevelTile = false) {
     SIDE_LENGTH,
     color,
     rotation,
-    isLevelTile
+    isLevelTile,
+    isBuildingBlock
   );
 }
 
-function BlueHexagon(x, y, rotation = 0, isLevelTile = false) {
+function BlueHexagon(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const SIDE_LENGTH = 100;
   let color = isLevelTile ? "grey" : "#1184e2";
 
-  return new Hexagon(x, y, SIDE_LENGTH, color, rotation, isLevelTile);
+  return new Hexagon(
+    x,
+    y,
+    SIDE_LENGTH,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock
+  );
 }
 
-function YellowDiamond(x, y, rotation = 0, isLevelTile = false) {
+function YellowDiamond(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const WIDTH = 70;
   const HEIGHT = 200;
   let color = isLevelTile ? "grey" : "#FFCC4D";
 
-  return new Diamond(x, y, WIDTH, HEIGHT, color, rotation, isLevelTile);
+  return new Diamond(
+    x,
+    y,
+    WIDTH,
+    HEIGHT,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock,
+    "yellow"
+  );
 }
 
-function PurpleDiamond(x, y, rotation = 0, isLevelTile = false) {
+function PurpleDiamond(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const WIDTH = 100;
   const HEIGHT = 200;
   let color = isLevelTile ? "grey" : "#9F9AFF";
 
-  return new Diamond(x, y, WIDTH, HEIGHT, color, rotation, isLevelTile);
+  return new Diamond(
+    x,
+    y,
+    WIDTH,
+    HEIGHT,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock,
+    "purple"
+  );
 }
 
-function PinkQuarterCircle(x, y, rotation = 0, isLevelTile = false) {
+function PinkQuarterCircle(
+  x,
+  y,
+  rotation = 0,
+  isLevelTile = false,
+  isBuildingBlock = false
+) {
   const RADIUS = 100;
   let color = isLevelTile ? "grey" : "#f5a8f3";
-  return new QuarterCircle(x, y, RADIUS, color, rotation, isLevelTile);
+  return new QuarterCircle(
+    x,
+    y,
+    RADIUS,
+    color,
+    rotation,
+    isLevelTile,
+    isBuildingBlock
+  );
 }
 
 //====================================
@@ -794,71 +1053,135 @@ function PinkQuarterCircle(x, y, rotation = 0, isLevelTile = false) {
 //====================================
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.width = 700;
-canvas.height = 1000;
+const container = document.getElementById("container");
+const level_number = document.getElementById("level");
+console.log(container);
+
+canvas.width = container.clientWidth + 200;
+canvas.height = container.clientHeight + 200;
 
 //TODO
 // Drag shapes on both sides of canvas
 // Randomize the shapes location on both sides
-// Add percertage text
+//Landing Page -
+//Add shape type to csv data
+//Add form on landing page for what type of mosue user is using
 
 //====================================
 //          Global Variables
 //====================================
 
 const shapes = [];
-let current_level = 1;
+let current_level = 2;
 let current_sub_level = 1;
+level_number.innerHTML = current_level;
+
 let current_shape_index = null;
+
 let mouse_motion_array = [];
-let mouse_motion_accumulator = 0;
-const mouse_motion_collect_interval = 10;
+let lastCollectionTime = 0;
+const throttlingInterval = 100; // 100 milliseconds
+
+//====================================
+//          Building Blocks
+//====================================
+
+// Create an array with instances of different shapes
+const building_blocks = [
+  OrangeSquare((canvas.width * 0.25) / 4 - 20, 10, 0, false, true),
+  RedCircle((canvas.width * 0.25) / 2, 10, 0, false, true),
+  GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
+  BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
+  GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
+  BlueHexagon((canvas.width * 0.25) / 2 - 20, 440, 180, false, true),
+  YellowDiamond((canvas.width * 0.25) / 2 - 50, 480, 90, false, true),
+  PurpleDiamond((canvas.width * 0.25) / 2 - 60, 580, 90, false, true),
+  PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
+];
+
+shapes.push(...building_blocks);
+
+function drawSectionLines() {
+  const section_one_line = canvas.width * 0.25;
+  const section_two_line = canvas.width * 0.75;
+
+  ctx.beginPath();
+
+  ctx.moveTo(section_one_line, 0);
+  ctx.lineTo(section_one_line, canvas.height);
+  ctx.stroke();
+
+  ctx.moveTo(section_two_line, 0);
+  ctx.lineTo(section_two_line, canvas.height);
+  ctx.stroke();
+
+  ctx.closePath();
+}
 
 //====================================
 //              Levels
 //====================================
 
+let LEVEL_X = canvas.width / 2;
+let LEVEL_Y = canvas.height / 2;
+
 const LEVELS = {
   1: {
     1: [
-      OrangeSquare(350, 400, 0, true), // Right Middle
-      OrangeSquare(350, 290, 0, true), //Left Middle
-      OrangeSquare(240, 400, 0, true), //Top Square
-      RedCircle(400, 560, 0, true), // Right Circle
-      RedCircle(290, 560, 0, true), //Left Circle
-      BlueRightTriangle(460, 400, 270, true), // Right - Triangle
-      BlueRightTriangle(130, 440, 180, true), // Left - Triangle],
+      OrangeSquare(LEVEL_X + 10, LEVEL_Y - 200, 0, true),
+      OrangeSquare(LEVEL_X + 10, LEVEL_Y - 90, 0, true),
+      OrangeSquare(LEVEL_X - 100, LEVEL_Y - 90, 0, true),
+      RedCircle(LEVEL_X + 30, LEVEL_Y + 20, 0, true), // Right Circle
+      RedCircle(LEVEL_X - 100, LEVEL_Y + 20, 0, true), // Right Circle
+      BlueRightTriangle(LEVEL_X + 120, LEVEL_Y - 90, 270, true), // Right - Triangle
+      BlueRightTriangle(LEVEL_X - 210, LEVEL_Y - 50, 180, true), // Left - Triangle],
+
+      // OrangeSquare(350 + LEVEL_X, 400 + LEVEL_Y, 0, true), // Right Middle
+      // OrangeSquare(350 + LEVEL_X, 290 + LEVEL_Y, 0, true), //Left Middle
+      // OrangeSquare(240 + LEVEL_X, 400 + LEVEL_Y, 0, true), //Top Square
+      // RedCircle(400 + LEVEL_X, 560 + LEVEL_Y, 0, true), // Right Circle
+      // RedCircle(290 + LEVEL_X, 560 + LEVEL_Y, 0, true), //Left Circle
+      // BlueRightTriangle(460 + LEVEL_X, 400 + LEVEL_Y, 270, true), // Right - Triangle
+      // BlueRightTriangle(130 + LEVEL_X, 440 + LEVEL_Y, 180, true), // Left - Triangle],
     ],
+
     2: [],
     3: [],
   },
   2: {
     1: [
-      OrangeSquare(300, 100, 0, true), // Head
-      BlueHexagon(350, 280, 0, true), //Body
-      GreenTrapezoid(350, 410, 180, true),
-      GreenTrapezoid(350, 515, 0, true),
-      GreenEquilateralTriangle(350, 600, 180, true), //Stinger
-      YellowDiamond(130, 120, 110, true), //Left Top Wing
-      YellowDiamond(130, 230, 75, true), //Left Bottom Wing
-      YellowDiamond(500, 120, 75, true), //R Top Wing
-      YellowDiamond(500, 230, 110, true), //R Bottom Wing
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 400, 0, true), // Head
+      BlueHexagon(LEVEL_X, LEVEL_Y - 220, 0, true), //Body
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y - 140, 180, true),
+      GreenTrapezoid(LEVEL_X - 100, LEVEL_Y - 35, 0, true),
+      GreenEquilateralTriangle(LEVEL_X - 0, LEVEL_Y + 100, 180, true), //Stinger
+      YellowDiamond(LEVEL_X - 220, LEVEL_Y - 380, 110, true), //Left Top Wing
+      YellowDiamond(LEVEL_X - 220, LEVEL_Y - 260, 75, true), //Left Bottom Wing
+      YellowDiamond(LEVEL_X + 150, LEVEL_Y - 380, 75, true), //R Top Wing
+      YellowDiamond(LEVEL_X + 150, LEVEL_Y - 260, 110, true), //R Bottom Wing
     ],
   },
-  3: {},
+  3: {
+    1: [
+      OrangeSquare(300 + LEVEL_X, 200 + LEVEL_Y, 0, true), // Body
+      OrangeSquare(300 + LEVEL_X, 310 + LEVEL_Y, 0, true), // Body
+      OrangeSquare(300 + LEVEL_X, 420 + LEVEL_Y, 0, true), // Body
+      OrangeSquare(300 + LEVEL_X, 530 + LEVEL_Y, 0, true), // Body
+      OrangeSquare(300 + LEVEL_X, 640 + LEVEL_Y, 0, true), // Body
+      GreenEquilateralTriangle(440 + LEVEL_X, 470 + LEVEL_Y, 90, true), //Right Middle Wing
+      GreenEquilateralTriangle(260 + LEVEL_X, 470 + LEVEL_Y, 30, true), //Left Middle Wing
+      BlueHexagon(490 + LEVEL_X, 370 + LEVEL_Y, 30, true), //Top Right Wing
+      BlueHexagon(490 + LEVEL_X, 570 + LEVEL_Y, 30, true), //Bottom Right Wing
+      BlueHexagon(210 + LEVEL_X, 370 + LEVEL_Y, 30, true), //Top Left Wing
+      BlueHexagon(210 + LEVEL_X, 570 + LEVEL_Y, 30, true), //Bottom Left Wing
+      GreenEquilateralTriangle(600 + LEVEL_X, 370 + LEVEL_Y, 90, true), //Top Right Wing
+      GreenEquilateralTriangle(600 + LEVEL_X, 570 + LEVEL_Y, 90, true), //Bottom Right Wing
+    ],
+  },
 };
 
+//Add Level to canvas
 shapes.push(...LEVELS[current_level][current_sub_level]);
-
-shapes.push(RedCircle(100, 20));
-shapes.push(OrangeSquare(200, 20));
-shapes.push(BlueRightTriangle(200, 50));
-shapes.push(GreenEquilateralTriangle(200, 50));
-shapes.push(BlueHexagon(200, 80));
-shapes.push(YellowDiamond(200, 80));
-shapes.push(PurpleDiamond(200, 100));
-shapes.push(GreenTrapezoid(100, 100));
-shapes.push(PinkQuarterCircle(200, 350));
 
 //====================================
 //          Progress Bar
@@ -870,7 +1193,6 @@ const progressBarPercent = document.getElementById("progress-bar-percent");
 // Update the progress bar with a percentage value
 function updateProgressBar() {
   percentage = getProgressBarPercentage();
-  console.log("Progress - ", percentage);
   progressBar.style.width = percentage + "%";
 }
 
@@ -930,18 +1252,6 @@ function getTimestamp() {
   return formattedTimestamp;
 }
 
-document.ondragover = function (event) {
-  mouse_motion_accumulator += 1;
-
-  //Collect mouse data every interval set by global var
-  if (mouse_motion_accumulator % mouse_motion_collect_interval != 0) return;
-
-  if (mouse_motion_array.length > 0) {
-    console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
-    mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]);
-  }
-};
-
 function postMouseMotionData() {
   fetch("/process-mouse-data", {
     method: "POST",
@@ -957,114 +1267,101 @@ function postMouseMotionData() {
 //====================================
 //          Block Options
 //====================================
-const shapeContainer1 = document.getElementById("shapeContainer1");
-const shapeContainer2 = document.getElementById("shapeContainer2");
+// const shapeContainer1 = document.getElementById("shapeContainer1");
+// const shapeContainer2 = document.getElementById("shapeContainer2");
 
-const shapeImages = document.querySelectorAll(".building-blocks");
+// const shapeImages = document.querySelectorAll(".building-blocks");
 
-// Prevent the default "no-drop" behavior on the canvas element
-canvas.addEventListener("dragover", (event) => {
-  event.preventDefault();
-});
+// // Prevent the default "no-drop" behavior on the canvas element
+// canvas.addEventListener("dragover", (event) => {
+//   event.preventDefault();
+// });
 
-[shapeContainer1, shapeContainer2].forEach((container) => {
-  container.addEventListener("mousedown", shapeContainerMouseDown);
-});
+// [shapeContainer1, shapeContainer2].forEach((container) => {
+//   container.addEventListener("mousedown", shapeContainerMouseDown);
+// });
 
-function shapeContainerMouseDown(event) {
-  if (event.target.tagName === "IMG") {
-    draggingImage = {
-      image: event.target,
-      offsetX: event.offsetX,
-      offsetY: event.offsetY,
-    };
+// function shapeContainerMouseDown(event) {
+//   if (event.target.tagName === "IMG") {
+//     draggingImage = {
+//       image: event.target,
+//       offsetX: event.offsetX,
+//       offsetY: event.offsetY,
+//     };
 
-    mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]); //Start of mouse motion
+//     // Set the image element to be draggable
+//     event.target.draggable = true;
 
-    // Set the image element to be draggable
-    event.target.draggable = true;
+//     // Add the necessary event listeners for the dragging behavior
+//     event.target.addEventListener("dragstart", dragStartHandler);
+//     event.target.addEventListener("dragend", dragEndHandler);
+//   }
+// }
 
-    // Add the necessary event listeners for the dragging behavior
-    event.target.addEventListener("dragstart", dragStartHandler);
-    event.target.addEventListener("dragend", dragEndHandler);
-  }
-}
+// function dragStartHandler(event) {
+//   draggingImage = {
+//     image: event.target,
+//     offsetX: event.offsetX,
+//     offsetY: event.offsetY,
+//   };
 
-function dragStartHandler(event) {
-  draggingImage = {
-    image: event.target,
-    offsetX: event.offsetX,
-    offsetY: event.offsetY,
-  };
+//   // Set the image element to be dragged as a custom cursor
+//   event.dataTransfer.setDragImage(
+//     event.target,
+//     draggingImage.offsetX,
+//     draggingImage.offsetY
+//   );
+// }
 
-  // Set the image element to be dragged as a custom cursor
-  event.dataTransfer.setDragImage(
-    event.target,
-    draggingImage.offsetX,
-    draggingImage.offsetY
-  );
-}
+// function dragEndHandler(event) {
+//   const { x, y } = calculateMousePos(event);
 
-function dragEndHandler(event) {
-  //Reset and Post Mouse Motion
-  console.log("End of motion - ", mouse_motion_array);
-  postMouseMotionData();
-  mouse_motion_accumulator = 0;
-  mouse_motion_array = [];
+//   // Check if the mouse is released over the canvas
+//   if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
+//     const shapeType = draggingImage.image.getAttribute("data-shape");
 
-  const { x, y } = calculateMousePos(event);
+//     let newShape;
+//     if (shapeType === "square") {
+//       newShape = OrangeSquare(
+//         x - draggingImage.offsetX,
+//         y - draggingImage.offsetY
+//       );
+//     } else if (shapeType === "circle") {
+//       newShape = RedCircle(x, y);
+//     } else if (shapeType === "rightTriangle") {
+//       newShape = BlueRightTriangle(
+//         x - draggingImage.offsetX,
+//         y - draggingImage.offsetY
+//       );
+//     }
 
-  // Check if the mouse is released over the canvas
-  if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
-    const shapeType = draggingImage.image.getAttribute("data-shape");
+//     // Add the new shape to the shapes array
+//     shapes.push(newShape);
 
-    let newShape;
-    if (shapeType === "square") {
-      newShape = new Square(
-        x - draggingImage.offsetX,
-        y - draggingImage.offsetY,
-        100,
-        100,
-        "orange"
-      );
-    } else if (shapeType === "circle") {
-      newShape = new Circle(x, y, 50, "red");
-    } else if (shapeType === "rightTriangle") {
-      newShape = new RightTriangle(
-        x - draggingImage.offsetX,
-        y - draggingImage.offsetY,
-        100,
-        100,
-        "blue"
-      );
-    }
+//     // Redraw the canvas
+//     drawShapes();
 
-    // Add the new shape to the shapes array
-    shapes.push(newShape);
+//     let shape = shapes[shapes.length - 1];
+//     for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
+//       // Check if the shape is close enough to a special shape and snap it if true
+//       shape.snapToTargetShape(targetShape);
+//       updateProgressBar();
+//     }
 
-    // Redraw the canvas
-    drawShapes();
+//     drawShapes();
+//   }
 
-    let shape = shapes[shapes.length - 1];
-    for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
-      // Check if the shape is close enough to a special shape and snap it if true
-      shape.snapToTargetShape(targetShape);
-      updateProgressBar();
-    }
-
-    drawShapes();
-  }
-
-  draggingImage = null;
-}
+//   draggingImage = null;
+// }
 
 //====================================
 //      Controls / EventListeners
 //====================================
 function mouse_down(event) {
   event.preventDefault();
-  // console.log("Mouse down - ", event);
-  console.log("Dragging Start Img - ", event.clientX, " , ", event.clientY);
+
+  console.log("Dragging Start  - ", event.clientX, " , ", event.clientY);
+  // mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]); //Start of mouse motion
 
   const { x, y } = calculateMousePos(event);
 
@@ -1075,8 +1372,24 @@ function mouse_down(event) {
     //Prevent level tiles & snapped shapes from being moved
     if (shape.isPointInside(x, y) && !shape.isLevelShape && !shape.isSnapped) {
       console.log("Inside of a shape");
-      current_shape_index = i;
-      shape.mouseDown(x, y);
+
+      if (shape.isBuildingBlock) {
+        let newShape;
+
+        if (shape instanceof Diamond) {
+          //TODO - Determine if yellow or purple Diamond, pass that into createShapeFromBlock
+        }
+        console.log("BUILD");
+
+        newShape = shape.createShapeFromBlock();
+        console.log(newShape.constructor.name);
+        shapes.push(newShape);
+        current_shape_index = shapes.length - 1;
+        newShape.mouseDown(x, y);
+      } else {
+        current_shape_index = i;
+        shape.mouseDown(x, y);
+      }
 
       // Move the shape to the top of the stack
       // shapes.push(shapes.splice(i, 1)[0]);
@@ -1092,8 +1405,13 @@ function mouse_up(event) {
 
   if (current_shape_index === null) return;
 
-  const shape = shapes[current_shape_index];
+  //Reset and Post Mouse Motion
+  console.log("End of motion - ", mouse_motion_array);
+  postMouseMotionData();
+  mouse_motion_accumulator = 0;
+  mouse_motion_array = [];
 
+  const shape = shapes[current_shape_index];
   shape.mouseUp();
   current_shape_index = null;
 }
@@ -1101,8 +1419,24 @@ function mouse_up(event) {
 function mouse_move(event) {
   if (current_shape_index === null) return;
 
-  const shape = shapes[current_shape_index];
+  //Collect mouse data every interval set by global var
+  const currentTime = Date.now();
 
+  // Check if enough time has passed since the last collection
+  if (currentTime - lastCollectionTime >= throttlingInterval) {
+    if (mouse_motion_array) {
+      console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
+      mouse_motion_array.push([
+        event.clientX,
+        event.clientY,
+        getTimestamp(),
+        shapes[current_shape_index].type,
+      ]);
+      lastCollectionTime = currentTime;
+    }
+  }
+
+  const shape = shapes[current_shape_index];
   for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
@@ -1125,6 +1459,8 @@ canvas.addEventListener("mousemove", mouse_move);
 
 function drawShapes() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawSectionLines();
+
   for (let shape of shapes) {
     shape.draw();
   }
