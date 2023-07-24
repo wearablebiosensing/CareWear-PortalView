@@ -1,0 +1,86 @@
+body {
+  background-color: aliceblue;
+}
+
+.landing_container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing_title {
+  text-align: center;
+  font-size: calc(4vh + 3vw);
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+.landing_hero_image_container {
+  display: flex;
+  justify-content: center;
+}
+
+.landing_hero_image {
+  max-width: min(80%, 600px);
+  height: auto;
+}
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~ Input Styles ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+.input-container {
+  position: relative;
+}
+
+button[type="submit"],
+input[type="text"] {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  width: 300px;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+input[type="text"]:focus {
+  border-color: #0099ff;
+}
+
+select {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  outline: none;
+  width: 300px;
+  transition: border-color 0.3s ease-in-out;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+select:focus {
+  border-color: #0099ff;
+}
+
+button[type="submit"] {
+  background-color: #0099ff;
+  color: white;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #0077cc;
+}
+
+button[type="submit"]:focus {
+  border-color: #0099ff;
+  outline: none;
+}
