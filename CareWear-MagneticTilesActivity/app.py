@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect,url_for
 import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
@@ -131,7 +131,16 @@ def home():
 def tiles_game():
   return render_template("tiles.html")
 
+@app.route('/scoring-page', methods=['GET','POST'])
+def scoring_page():
+  return render_template("scoring_module.html")
 
+@app.route('/scoring', methods=['GET','POST'])
+def level_complete():
+    return redirect(url_for("scoring_page"))
+
+
+ 
 
 
 

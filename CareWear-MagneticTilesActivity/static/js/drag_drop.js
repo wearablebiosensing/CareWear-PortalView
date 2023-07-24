@@ -25,7 +25,7 @@ class Shape {
 
   checkRotationThreshold(targetShape, equivalentRotations = [0]) {
     const rotationDifference = Math.abs(this.rotation - targetShape.rotation);
-    const rotationThreshold = 15;
+    const rotationThreshold = 300;
 
     for (const angle of equivalentRotations) {
       const difference = Math.abs(rotationDifference - angle);
@@ -1454,6 +1454,17 @@ function mouse_move(event) {
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
+    if(getProgressBarPercentage()==100){
+      fetch("/scoring", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // body: JSON.stringify({ data: mouse_motion_array }),
+      })
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+    }
   }
 
   const { x, y } = calculateMousePos(event);
