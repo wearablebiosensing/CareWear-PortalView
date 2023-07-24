@@ -1057,8 +1057,21 @@ const container = document.getElementById("container");
 const level_number = document.getElementById("level");
 console.log(container);
 
-canvas.width = container.clientWidth + 200;
-canvas.height = container.clientHeight + 200;
+canvas.width = container.clientWidth + 300;
+canvas.height = container.clientHeight + 300;
+
+console.log("First - ", canvas.width);
+
+// const range_slider = document.getElementById("canvas-scale");
+// console.log(range_slider);
+
+// range_slider.addEventListener("change", (event) => {
+//   console.log("VAL  - ", range_slider.value, typeof range_slider.value);
+//   const val = Number(range_slider.value);
+//   canvas.width = container.clientWidth + val;
+//   canvas.height = container.clientHeight + val;
+//   console.log("After - ", canvas.width);
+// });
 
 //TODO
 // Drag shapes on both sides of canvas

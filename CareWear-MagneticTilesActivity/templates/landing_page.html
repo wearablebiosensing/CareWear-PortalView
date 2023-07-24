@@ -5,9 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
+      href="{{ url_for('static', filename='css/global.css') }}"
+    />
+    <link
+      rel="stylesheet"
       href="{{ url_for('static', filename='css/landing_page.css') }}"
     />
     <title>Landing Page</title>
   </head>
-  <body></body>
+  <body>
+    <div class="landing_container">
+      <div class="landing_title">Swift-Gear</div>
+      <div class="landing_hero_image_container">
+        <img
+          class="landing_hero_image"
+          src="{{ url_for('static', filename='images/Group.svg') }}"
+          alt="Group"
+        />
+      </div>
+
+      <div class="input-wrapper">
+        <div class="input-container">
+          <input type="text" placeholder="Watch ID" />
+        </div>
+        <div class="input-container">
+          <select>
+            <option value="" disabled selected>Select Mouse Type</option>
+            <option value="option1">Trackpad</option>
+            <option value="option2">Mouse</option>
+            <option value="option3">Other</option>
+          </select>
+        </div>
+        <a href="{{ url_for('tiles_game') }}"
+          ><button type="submit">Submit</button></a
+        >
+      </div>
+    </div>
+  </body>
 </html>

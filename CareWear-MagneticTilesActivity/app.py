@@ -27,10 +27,15 @@ firebase_admin.initialize_app(cred, {
 })
 ref = db.reference('/sensors_message')  # Path to your sensor data node in the database
 
-
 @app.route('/')
+@app.route('/landing')
 def home():
-  return render_template("canvas.html")
+  return render_template("landing_page.html")
+
+
+@app.route('/tiles-game')
+def tiles_game():
+  return render_template("tiles.html")
 
 
 
@@ -66,7 +71,7 @@ def processMouseMovementData():
 
             
             # Create the header row
-            header_row = ['x', 'y', 'timestamp']
+            header_row = ['x', 'y', 'timestamp', 'shape']
             csv_data = [header_row] + accumulated_data
 
             # Convert the accumulated data to a CSV string
@@ -82,7 +87,7 @@ def processMouseMovementData():
             # Upload the CSV file to Firebase Storage
             #UNCOMMENT BELOW TO UPLOAD TO FIREBASE
             # bucket = storage.bucket()
-            # file_name = temp_file.name.split('/')[-1]
+            # file_name = temp_file.name.split('\\')[-1]
             # print(file_name)
             # blob = bucket.blob('MagneticTiles/' + file_name)  # Use the temp file name as the blob name
             # blob.upload_from_file(temp_file)
