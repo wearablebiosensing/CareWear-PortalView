@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Title</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/global.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/tiles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <!-- <h1 class="title">Magnetic Tiles Activity</h1> -->
+        <p class="subtitle">Level <span id="level"></span></p>
+        <!-- <input id="canvas-scale" type="range" min="1" max="500" value="300" /> -->
+        <div class="help-icon-wrapper" id="help-icon">
+          <img
+            src="{{ url_for('static', filename='images/info-circle.svg') }}"
+            alt="Help Icon"
+          />
+          <div class="popup" id="popup">
+            <div class="directions">
+              <div class="key">
+                <img
+                  src="{{ url_for('static', filename='images/R-Key.png') }}"
+                  alt="R"
+                />
+                Rotate Shape Right
+              </div>
+
+              <div class="key">
+                <img
+                  src="{{ url_for('static', filename='images/E-Key.png') }}"
+                  alt="R"
+                />
+                Rotate Shape Left
+              </div>
+
+              <div class="key">
+                <img
+                  src="{{ url_for('static', filename='images/mouse.png') }}"
+                  alt="Mouse"
+                />
+                Drag / Drop Shapes
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main>
+        <div class="canvas-container" id="container">
+          <canvas id="canvas"></canvas>
+        </div>
+      </main>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progressBarWrapper">
+      <div class="progress-bar">
+        <h1 id="progress-bar-percent">0% complete</h1>
+        <div class="progress-bar-inner" id="progressBar"></div>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+  </body>
+</html>
