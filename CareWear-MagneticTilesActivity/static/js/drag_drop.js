@@ -1454,16 +1454,17 @@ function mouse_move(event) {
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
-    if(getProgressBarPercentage()==100){
-      fetch("/scoring", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // body: JSON.stringify({ data: mouse_motion_array }),
-      })
-        .then((res) => console.log(res))
-        .catch((err) => console.log(err));
+    if (getProgressBarPercentage() == 100) {
+      window.location.href = "/scoring-page";
+      //   fetch("/scoring", {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     // body: JSON.stringify({ data: mouse_motion_array }),
+      //   })
+      //     .then((res) => console.log(res))
+      //     .catch((err) => console.log(err));
     }
   }
 
