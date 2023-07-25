@@ -15,6 +15,18 @@
   </head>
   <body>
     <div class="container">
+      <div class="mouse-data">
+        Movement - X : <span id="movementX"></span> px<br />
+        Movement - Y : <span id="movementY"></span> px<br />
+        Movement : <span id="movement"></span> px<br />
+        Speed : <span id="speed"></span> px/s<br />
+        Max. Speed : <span id="maxSpeed"></span> px/s<br />
+        Acceleration : <span id="acceleration"></span> px/s<sup>2</sup><br />
+        Max. Positive Acceleration :
+        <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
+        Max. Negative Acceleration :
+        <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
+      </div>
       <header>
         <!-- <h1 class="title">Magnetic Tiles Activity</h1> -->
         <p class="subtitle">Level <span id="level"></span></p>
@@ -69,6 +81,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
   </body>
 </html>

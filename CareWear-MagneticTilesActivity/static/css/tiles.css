@@ -11,6 +11,13 @@ header {
   margin: 0 0 10px 0;
 }
 
+.mouse-data {
+  position: absolute;
+  right: 20px;
+  top: 100px;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
 /* Styles for the help icon */
 .help-icon-wrapper {
   & img {
@@ -72,6 +79,7 @@ main {
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 .canvas-container {
