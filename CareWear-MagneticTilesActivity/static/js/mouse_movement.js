@@ -13,6 +13,9 @@ setInterval(function () {
     var movementY = Math.abs(currentEvent.screenY - prevEvent.screenY);
     var movement = Math.sqrt(movementX * movementX + movementY * movementY);
 
+    document.getElementById("currentWindowX").innerText = currentEvent.clientX;
+    document.getElementById("currentWindowY").innerText = currentEvent.clientY;
+
     document.getElementById("movementX").innerText = movementX;
     document.getElementById("movementY").innerText = movementY;
     document.getElementById("movement").innerText = Math.round(movement);
