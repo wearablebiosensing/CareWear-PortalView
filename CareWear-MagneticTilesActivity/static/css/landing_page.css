@@ -1,5 +1,5 @@
 body {
-  background-color: aliceblue;
+  background-color: rgb(240, 248, 255);
 }
 
 .landing_container {
@@ -16,10 +16,13 @@ body {
 .landing_hero_image_container {
   display: flex;
   justify-content: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 .landing_hero_image {
-  max-width: min(80%, 600px);
+  width: min(80%, 500px);
+  /* width: 700px; */
   height: auto;
 }
 
