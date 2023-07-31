@@ -174,7 +174,7 @@ def processMouseMovementData():
 
             
             # Create the header row
-            header_row = ['x', 'y', 'timestamp', 'shape']
+            header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)']
             csv_data = [header_row] + accumulated_data
 
             # Convert the accumulated data to a CSV string

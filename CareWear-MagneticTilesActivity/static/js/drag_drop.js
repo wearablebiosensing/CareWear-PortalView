@@ -1084,16 +1084,31 @@ console.log("First - ", canvas.width);
 //          Global Variables
 //====================================
 
-const shapes = [];
+
+//Shape Stuff
+let shapes = [];
+let current_shape_index = null;
+
+//Level Data
 let current_level = 2;
 let current_sub_level = 1;
 level_number.innerHTML = current_level;
 
-let current_shape_index = null;
 
+//Progress Bar
+const progressBar = document.getElementById("progressBar");
+const progressBarPercent = document.getElementById("progress-bar-percent");
+
+//Mouse Data
 let mouse_motion_array = [];
 let lastCollectionTime = 0;
 const throttlingInterval = 100; // 100 milliseconds
+
+//  -> Mouse Acceleration
+//      -> Define variables to store previous mouse position and timestamp
+let prevMouseX = 0;
+let prevMouseY = 0;
+let prevTimestamp = 0;
 
 //====================================
 //          Building Blocks
@@ -1112,7 +1127,7 @@ const building_blocks = [
   PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
 ];
 
-shapes.push(...building_blocks);
+// shapes.push(...building_blocks);
 
 function drawSectionLines() {
   const section_one_line = canvas.width * 0.25;
@@ -1148,14 +1163,6 @@ const LEVELS = {
       RedCircle(LEVEL_X - 100, LEVEL_Y + 20, 0, true), // Right Circle
       BlueRightTriangle(LEVEL_X + 120, LEVEL_Y - 90, 270, true), // Right - Triangle
       BlueRightTriangle(LEVEL_X - 210, LEVEL_Y - 50, 180, true), // Left - Triangle],
-
-      // OrangeSquare(350 + LEVEL_X, 400 + LEVEL_Y, 0, true), // Right Middle
-      // OrangeSquare(350 + LEVEL_X, 290 + LEVEL_Y, 0, true), //Left Middle
-      // OrangeSquare(240 + LEVEL_X, 400 + LEVEL_Y, 0, true), //Top Square
-      // RedCircle(400 + LEVEL_X, 560 + LEVEL_Y, 0, true), // Right Circle
-      // RedCircle(290 + LEVEL_X, 560 + LEVEL_Y, 0, true), //Left Circle
-      // BlueRightTriangle(460 + LEVEL_X, 400 + LEVEL_Y, 270, true), // Right - Triangle
-      // BlueRightTriangle(130 + LEVEL_X, 440 + LEVEL_Y, 180, true), // Left - Triangle],
     ],
 
     2: [],
@@ -1176,32 +1183,56 @@ const LEVELS = {
   },
   3: {
     1: [
-      OrangeSquare(300 + LEVEL_X, 200 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 310 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 420 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 530 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 640 + LEVEL_Y, 0, true), // Body
-      GreenEquilateralTriangle(440 + LEVEL_X, 470 + LEVEL_Y, 90, true), //Right Middle Wing
-      GreenEquilateralTriangle(260 + LEVEL_X, 470 + LEVEL_Y, 30, true), //Left Middle Wing
-      BlueHexagon(490 + LEVEL_X, 370 + LEVEL_Y, 30, true), //Top Right Wing
-      BlueHexagon(490 + LEVEL_X, 570 + LEVEL_Y, 30, true), //Bottom Right Wing
-      BlueHexagon(210 + LEVEL_X, 370 + LEVEL_Y, 30, true), //Top Left Wing
-      BlueHexagon(210 + LEVEL_X, 570 + LEVEL_Y, 30, true), //Bottom Left Wing
-      GreenEquilateralTriangle(600 + LEVEL_X, 370 + LEVEL_Y, 90, true), //Top Right Wing
-      GreenEquilateralTriangle(600 + LEVEL_X, 570 + LEVEL_Y, 90, true), //Bottom Right Wing
+      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 370, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 260, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 150, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 40, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50 , LEVEL_Y + 70, 0, true), // Body
+      YellowDiamond(LEVEL_X - 190, LEVEL_Y - 500, 110, true), //Left Ear
+      YellowDiamond(LEVEL_X + 120, LEVEL_Y - 500, 70, true), //Right Ear
+      GreenEquilateralTriangle(LEVEL_X + 85 , LEVEL_Y - 100, 90, true), //Right Middle Wing
+      GreenEquilateralTriangle(LEVEL_X - 85 , LEVEL_Y - 100, 30, true), //Left Middle Wing
+      BlueHexagon(LEVEL_X + 135  , LEVEL_Y - 210, 30, true), //Top Right Wing
+      BlueHexagon(LEVEL_X - 135  , LEVEL_Y - 210, 30, true), //Bottom Right Wing
+      BlueHexagon(LEVEL_X + 135  , LEVEL_Y + 10, 30, true), //Top Left Wing
+      BlueHexagon(LEVEL_X - 135  , LEVEL_Y + 10, 30, true), //Bottom Left Wing
+      GreenEquilateralTriangle(LEVEL_X + 245 , LEVEL_Y - 210, 90, true), //Top Right Wing
+      GreenEquilateralTriangle(LEVEL_X + 245 , LEVEL_Y + 10, 90, true), //Bottom Right Wing
+      GreenEquilateralTriangle(LEVEL_X - 245 , LEVEL_Y - 210, 30, true), //Top Left Wing
+      GreenEquilateralTriangle(LEVEL_X - 245 , LEVEL_Y + 10, 30, true), //Bottom Left Wing
+      PurpleDiamond(LEVEL_X - 10 , LEVEL_Y + 120, 115, true) //Stinger
     ],
   },
 };
 
 //Add Level to canvas
-shapes.push(...LEVELS[current_level][current_sub_level]);
+// shapes.push(...LEVELS[current_level][current_sub_level]);
+
+
+function changeCurrentLevel(level, sub_level){
+  current_level = level;
+  current_sub_level = sub_level;
+
+  //Reset All Shapes on screen
+  shapes = []
+
+  //Add Back and Draw needed blocks
+  shapes.push(...building_blocks);
+  shapes.push(...LEVELS[current_level][current_sub_level]);
+
+  //Update UI
+  drawShapes()
+  updateProgressBar()
+
+}
+
+//THIS IS WHAT STARTS THE GAME
+changeCurrentLevel(3,1);
+
 
 //====================================
 //          Progress Bar
 //====================================
-
-const progressBar = document.getElementById("progressBar");
-const progressBarPercent = document.getElementById("progress-bar-percent");
 
 // Update the progress bar with a percentage value
 function updateProgressBar() {
@@ -1233,13 +1264,13 @@ function getProgressBarPercentage() {
 //             Utils
 //====================================
 
-function calculateMousePos(evt) {
+function calculateMousePos(clientX, clientY) {
   /* Function to calculate mouse coordinates relative to the canvas*/
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
-  const x = (evt.clientX - rect.left) * scaleX;
-  const y = (evt.clientY - rect.top) * scaleY;
+  const x = (clientX - rect.left) * scaleX;
+  const y = (clientY - rect.top) * scaleY;
   return { x, y };
 }
 
@@ -1280,92 +1311,6 @@ function postMouseMotionData() {
 //====================================
 //          Block Options
 //====================================
-// const shapeContainer1 = document.getElementById("shapeContainer1");
-// const shapeContainer2 = document.getElementById("shapeContainer2");
-
-// const shapeImages = document.querySelectorAll(".building-blocks");
-
-// // Prevent the default "no-drop" behavior on the canvas element
-// canvas.addEventListener("dragover", (event) => {
-//   event.preventDefault();
-// });
-
-// [shapeContainer1, shapeContainer2].forEach((container) => {
-//   container.addEventListener("mousedown", shapeContainerMouseDown);
-// });
-
-// function shapeContainerMouseDown(event) {
-//   if (event.target.tagName === "IMG") {
-//     draggingImage = {
-//       image: event.target,
-//       offsetX: event.offsetX,
-//       offsetY: event.offsetY,
-//     };
-
-//     // Set the image element to be draggable
-//     event.target.draggable = true;
-
-//     // Add the necessary event listeners for the dragging behavior
-//     event.target.addEventListener("dragstart", dragStartHandler);
-//     event.target.addEventListener("dragend", dragEndHandler);
-//   }
-// }
-
-// function dragStartHandler(event) {
-//   draggingImage = {
-//     image: event.target,
-//     offsetX: event.offsetX,
-//     offsetY: event.offsetY,
-//   };
-
-//   // Set the image element to be dragged as a custom cursor
-//   event.dataTransfer.setDragImage(
-//     event.target,
-//     draggingImage.offsetX,
-//     draggingImage.offsetY
-//   );
-// }
-
-// function dragEndHandler(event) {
-//   const { x, y } = calculateMousePos(event);
-
-//   // Check if the mouse is released over the canvas
-//   if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
-//     const shapeType = draggingImage.image.getAttribute("data-shape");
-
-//     let newShape;
-//     if (shapeType === "square") {
-//       newShape = OrangeSquare(
-//         x - draggingImage.offsetX,
-//         y - draggingImage.offsetY
-//       );
-//     } else if (shapeType === "circle") {
-//       newShape = RedCircle(x, y);
-//     } else if (shapeType === "rightTriangle") {
-//       newShape = BlueRightTriangle(
-//         x - draggingImage.offsetX,
-//         y - draggingImage.offsetY
-//       );
-//     }
-
-//     // Add the new shape to the shapes array
-//     shapes.push(newShape);
-
-//     // Redraw the canvas
-//     drawShapes();
-
-//     let shape = shapes[shapes.length - 1];
-//     for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
-//       // Check if the shape is close enough to a special shape and snap it if true
-//       shape.snapToTargetShape(targetShape);
-//       updateProgressBar();
-//     }
-
-//     drawShapes();
-//   }
-
-//   draggingImage = null;
-// }
 
 //====================================
 //      Controls / EventListeners
@@ -1374,9 +1319,22 @@ function mouse_down(event) {
   event.preventDefault();
 
   console.log("Dragging Start  - ", event.clientX, " , ", event.clientY);
-  // mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]); //Start of mouse motion
 
-  const { x, y } = calculateMousePos(event);
+  let clientX = 0;
+  let clientY = 0;
+
+  // Handle touch events as well
+  if (event.type === "touchstart") {
+    // Get touch coordinates
+    const touch = event.touches[0];
+    clientX = touch.clientX;
+    clientY = touch.clientY;
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
+  const { x, y } = calculateMousePos(clientX, clientY);
 
   // Check if the mouse is inside any shape
   for (let i = shapes.length - 1; i >= 0; i--) {
@@ -1432,18 +1390,60 @@ function mouse_up(event) {
 function mouse_move(event) {
   if (current_shape_index === null) return;
 
+  let clientX = 0;
+  let clientY = 0;
+
+  // Handle touch events as well
+  if (event.type === "touchmove") {
+    // Get touch coordinates
+    const touch = event.touches[0];
+    clientX = Math.round(touch.clientX);
+    clientY = Math.round(touch.clientY);
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
   //Collect mouse data every interval set by global var
   const currentTime = Date.now();
+
+  const { x, y } = calculateMousePos(clientX, clientY);
+
+  // Calculate the change in position and time
+  const dx = x - prevMouseX;
+  const dy = y - prevMouseY;
+  const dt = currentTime - prevTimestamp;
+
+  // Calculate the acceleration
+  const accelerationX = dx / dt;
+  const accelerationY = dy / dt;
+
+  const accelerationX_in_px_per_s_squared = accelerationX * 1000;
+  const accelerationY_in_px_per_s_squared = accelerationY * 1000;
+
+  // Store the current mouse position and timestamp for the next iteration
+  prevMouseX = x;
+  prevMouseY = y;
+  prevTimestamp = currentTime;
+
+  console.log(
+    "X acc - ",
+    Math.round(accelerationX_in_px_per_s_squared),
+    "   Y acc - ",
+    Math.round(accelerationY_in_px_per_s_squared)
+  );
 
   // Check if enough time has passed since the last collection
   if (currentTime - lastCollectionTime >= throttlingInterval) {
     if (mouse_motion_array) {
-      console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
+      // console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
       mouse_motion_array.push([
-        event.clientX,
-        event.clientY,
+        clientX,
+        clientY,
         getTimestamp(),
         shapes[current_shape_index].type,
+        Math.round(accelerationX_in_px_per_s_squared),
+        Math.round(accelerationY_in_px_per_s_squared),
       ]);
       lastCollectionTime = currentTime;
     }
@@ -1455,20 +1455,10 @@ function mouse_move(event) {
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
     if (getProgressBarPercentage() == 100) {
-      window.location.href = "/scoring-page";
-      //   fetch("/scoring", {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     // body: JSON.stringify({ data: mouse_motion_array }),
-      //   })
-      //     .then((res) => console.log(res))
-      //     .catch((err) => console.log(err));
+      window.location.href = "/scoring-page"; //Send to scoring page
     }
   }
 
-  const { x, y } = calculateMousePos(event);
   shapes[current_shape_index].mouseMove(x, y);
 
   drawShapes();
@@ -1477,6 +1467,21 @@ function mouse_move(event) {
 canvas.addEventListener("mousedown", mouse_down);
 canvas.addEventListener("mouseup", mouse_up);
 canvas.addEventListener("mousemove", mouse_move);
+
+canvas.addEventListener("touchstart", mouse_down);
+canvas.addEventListener("touchend", mouse_up);
+canvas.addEventListener("touchmove", mouse_move);
+
+// canvas.addEventListener("touchstart", (evt) => {
+//   console.log(evt, "Touch Start");
+// });
+
+// canvas.addEventListener("touchend", (evt) => {
+//   console.log(evt, "Touch End");
+// });
+// canvas.addEventListener("touchmove", (evt) => {
+//   console.log(evt, "Touch Move");
+// });
 
 //====================================
 //          Game Functions

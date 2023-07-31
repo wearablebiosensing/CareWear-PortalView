@@ -12,10 +12,17 @@ header {
 }
 
 .mouse-data {
+  display: none;
   position: absolute;
   right: 20px;
-  top: 100px;
+  bottom: 40px;
   font-family: "IBM Plex Sans", sans-serif;
+}
+
+.mouse-data-icon {
+  width: 20px;
+  height: 20px;
+  background-color: red;
 }
 
 /* Styles for the help icon */

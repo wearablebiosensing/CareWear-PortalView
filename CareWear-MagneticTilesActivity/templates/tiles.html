@@ -15,7 +15,7 @@
   </head>
   <body>
     <div class="container">
-      <div class="mouse-data">
+      <div class="mouse-data" id="mouse_popup">
         Current Window - X : <span id="currentWindowX"></span> px<br />
         Current Window - Y : <span id="currentWindowY"></span> px<br />
         Movement - X : <span id="movementX"></span> px<br />
@@ -23,22 +23,32 @@
         Movement : <span id="movement"></span> px<br />
         Speed : <span id="speed"></span> px/s<br />
         Max. Speed : <span id="maxSpeed"></span> px/s<br />
-        Acceleration : <span id="acceleration"></span> px/s<sup>2</sup><br />
+        Acceleration X : <span id="accelerationX"></span> px/s<sup>2</sup><br />
+        Acceleration Y : <span id="accelerationY"></span> px/s<sup>2</sup><br />
         Max. Positive Acceleration :
         <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
         Max. Negative Acceleration :
         <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
       </div>
+
       <header>
         <!-- <h1 class="title">Magnetic Tiles Activity</h1> -->
         <p class="subtitle">Level <span id="level"></span></p>
+      <button onclick="changeCurrentLevel(1, 1)">Move</button>
         <!-- <input id="canvas-scale" type="range" min="1" max="500" value="300" /> -->
+
+        <div class="mouse-data-icon" id="mouse-data">
+          <!-- Add your help icon here (e.g., an image or an icon font) -->
+          <!-- Example: <img src="help_icon.png" alt="Help Icon"> -->
+        </div>
+
         <div class="help-icon-wrapper" id="help-icon">
           <img
             src="{{ url_for('static', filename='images/info-circle.svg') }}"
             alt="Help Icon"
           />
-          <div class="popup" id="popup">
+
+          <div class="popup" id="directions_popup">
             <div class="directions">
               <div class="key">
                 <img

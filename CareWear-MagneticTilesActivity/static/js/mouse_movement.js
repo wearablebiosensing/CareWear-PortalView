@@ -7,10 +7,20 @@ var maxSpeed = 0,
   prevSpeed = 0,
   maxPositiveAcc = 0,
   maxNegativeAcc = 0;
+
+// Define variables to store previous mouse position and timestamp
+let pMouseX = 0;
+let pMouseY = 0;
+let pTimestamp = 0;
+
 setInterval(function () {
   if (prevEvent && currentEvent) {
-    var movementX = Math.abs(currentEvent.screenX - prevEvent.screenX);
-    var movementY = Math.abs(currentEvent.screenY - prevEvent.screenY);
+    const x = currentEvent.screenX;
+    const y = currentEvent.screenY;
+    const prev_x = prevEvent.screenX;
+    const prev_y = prevEvent.screenY;
+    var movementX = Math.abs(x - prev_x);
+    var movementY = Math.abs(y - prev_y);
     var movement = Math.sqrt(movementX * movementX + movementY * movementY);
 
     document.getElementById("currentWindowX").innerText = currentEvent.clientX;
@@ -30,22 +40,45 @@ setInterval(function () {
 
     var acceleration = 10 * (speed - prevSpeed);
 
-    document.getElementById("acceleration").innerText =
-      Math.round(acceleration);
+    // Calculate the change in position and time
+    const dx = x - prev_x;
+    const dy = y - prev_y;
 
-    if (acceleration > 0) {
-      document.getElementById("maxPositiveAcceleration").innerText = Math.round(
-        acceleration > maxPositiveAcc
-          ? (maxPositiveAcc = acceleration)
-          : maxPositiveAcc
-      );
-    } else {
-      document.getElementById("maxNegativeAcceleration").innerText = Math.round(
-        acceleration < maxNegativeAcc
-          ? (maxNegativeAcc = acceleration)
-          : maxNegativeAcc
-      );
-    }
+    let currentTime = Date.now();
+    const dt = currentTime - pTimestamp;
+
+    // Calculate the acceleration
+    const accelerationX = dx / dt;
+    const accelerationY = dy / dt;
+
+    const accelerationX_in_px_per_s_squared = accelerationX * 1000;
+    const accelerationY_in_px_per_s_squared = accelerationY * 1000;
+
+    // Store the current mouse position and timestamp for the next iteration
+    pMouseX = x;
+    pMouseY = y;
+    pTimestamp = currentTime;
+
+    document.getElementById("accelerationX").innerText = Math.round(
+      accelerationX_in_px_per_s_squared
+    );
+    document.getElementById("accelerationY").innerText = Math.round(
+      accelerationY_in_px_per_s_squared
+    );
+
+    // if (acceleration > 0) {
+    //   document.getElementById("maxPositiveAcceleration").innerText = Math.round(
+    //     acceleration > maxPositiveAcc
+    //       ? (maxPositiveAcc = acceleration)
+    //       : maxPositiveAcc
+    //   );
+    // } else {
+    //   document.getElementById("maxNegativeAcceleration").innerText = Math.round(
+    //     acceleration < maxNegativeAcc
+    //       ? (maxNegativeAcc = acceleration)
+    //       : maxNegativeAcc
+    //   );
+    // }
   }
 
   prevEvent = currentEvent;
