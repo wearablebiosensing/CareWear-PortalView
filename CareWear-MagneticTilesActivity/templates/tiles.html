@@ -15,33 +15,16 @@
   </head>
   <body>
     <div class="container">
-      <div class="mouse-data" id="mouse_popup">
-        Current Window - X : <span id="currentWindowX"></span> px<br />
-        Current Window - Y : <span id="currentWindowY"></span> px<br />
-        Movement - X : <span id="movementX"></span> px<br />
-        Movement - Y : <span id="movementY"></span> px<br />
-        Movement : <span id="movement"></span> px<br />
-        Speed : <span id="speed"></span> px/s<br />
-        Max. Speed : <span id="maxSpeed"></span> px/s<br />
-        Acceleration X : <span id="accelerationX"></span> px/s<sup>2</sup><br />
-        Acceleration Y : <span id="accelerationY"></span> px/s<sup>2</sup><br />
-        Max. Positive Acceleration :
-        <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
-        Max. Negative Acceleration :
-        <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
-      </div>
-
       <header>
-        <!-- <h1 class="title">Magnetic Tiles Activity</h1> -->
+        <!-- Shows what level user is on -->
         <p class="subtitle">Level <span id="level"></span></p>
-      <button onclick="changeCurrentLevel(1, 1)">Move</button>
-        <!-- <input id="canvas-scale" type="range" min="1" max="500" value="300" /> -->
 
-        <div class="mouse-data-icon" id="mouse-data">
-          <!-- Add your help icon here (e.g., an image or an icon font) -->
-          <!-- Example: <img src="help_icon.png" alt="Help Icon"> -->
-        </div>
+        <!-- Button to toggle mouse statistics -->
+        <div class="mouse-data-icon" id="mouse-data"></div>
 
+        <div>User ID: <span id="userID"></span></div>
+
+        <!-- Popup to give users directions about the game -->
         <div class="help-icon-wrapper" id="help-icon">
           <img
             src="{{ url_for('static', filename='images/info-circle.svg') }}"
@@ -82,6 +65,23 @@
           <canvas id="canvas"></canvas>
         </div>
       </main>
+
+      <!-- Mouse Statistics Data -->
+      <div class="mouse-data" id="mouse_popup">
+        Current Window - X : <span id="currentWindowX"></span> px<br />
+        Current Window - Y : <span id="currentWindowY"></span> px<br />
+        Movement - X : <span id="movementX"></span> px<br />
+        Movement - Y : <span id="movementY"></span> px<br />
+        Movement : <span id="movement"></span> px<br />
+        Speed : <span id="speed"></span> px/s<br />
+        Max. Speed : <span id="maxSpeed"></span> px/s<br />
+        Acceleration X : <span id="accelerationX"></span> px/s<sup>2</sup><br />
+        Acceleration Y : <span id="accelerationY"></span> px/s<sup>2</sup><br />
+        Max. Positive Acceleration :
+        <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
+        Max. Negative Acceleration :
+        <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
+      </div>
     </div>
 
     <!-- Progress Bar -->
@@ -95,5 +95,20 @@
     <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+
+    <script>
+      const userID_display = document.getElementById("userID");
+      const currentLevel_display = document.getElementById("level");
+
+      /*This function comes from drag_drop.js
+      Make sure it is included before this is called*/
+      //This function will change the specific level user is on
+      const currentLevel = Number(getLocalStorageOrNull("currentLevel"));
+      changeCurrentLevel(currentLevel, 1); //NOTHING WILL WORK WITHOUT THIS
+
+      //Update text on page
+      userID_display.innerText = getLocalStorageOrNull("userID");
+      currentLevel_display.innerText = currentLevel;
+    </script>
   </body>
 </html>

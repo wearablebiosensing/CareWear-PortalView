@@ -1054,46 +1054,39 @@ function PinkQuarterCircle(
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const container = document.getElementById("container");
-const level_number = document.getElementById("level");
+
 console.log(container);
 
 canvas.width = container.clientWidth + 300;
 canvas.height = container.clientHeight + 300;
 
-console.log("First - ", canvas.width);
-
-// const range_slider = document.getElementById("canvas-scale");
-// console.log(range_slider);
-
-// range_slider.addEventListener("change", (event) => {
-//   console.log("VAL  - ", range_slider.value, typeof range_slider.value);
-//   const val = Number(range_slider.value);
-//   canvas.width = container.clientWidth + val;
-//   canvas.height = container.clientHeight + val;
-//   console.log("After - ", canvas.width);
-// });
-
 //TODO
-// Drag shapes on both sides of canvas
-// Randomize the shapes location on both sides
-//Landing Page -
-//Add shape type to csv data
-//Add form on landing page for what type of mosue user is using
+// - Store User ID in local storage so it can be used in csv file name
+// - Add parameters the the tiles-game route to specify what level it should be,
+// then use those paramertrs to call changeCurrentLevel(2, 1); with the correct values
+// also maybe store those values in local storage so we can progreess between levels when sent to scoring page
+
+function getLocalStorageOrNull(key) {
+  try {
+    const value = localStorage.getItem(key);
+    return value !== null ? value : null;
+  } catch (error) {
+    console.error("Error retrieving from local storage:", error);
+    return null;
+  }
+}
 
 //====================================
 //          Global Variables
 //====================================
-
 
 //Shape Stuff
 let shapes = [];
 let current_shape_index = null;
 
 //Level Data
-let current_level = 2;
+let current_level = 1;
 let current_sub_level = 1;
-level_number.innerHTML = current_level;
-
 
 //Progress Bar
 const progressBar = document.getElementById("progressBar");
@@ -1102,7 +1095,7 @@ const progressBarPercent = document.getElementById("progress-bar-percent");
 //Mouse Data
 let mouse_motion_array = [];
 let lastCollectionTime = 0;
-const throttlingInterval = 100; // 100 milliseconds
+const throttlingInterval = 150; // 150 milliseconds
 
 //  -> Mouse Acceleration
 //      -> Define variables to store previous mouse position and timestamp
@@ -1183,52 +1176,43 @@ const LEVELS = {
   },
   3: {
     1: [
-      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 370, 0, true), // Body
-      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 260, 0, true), // Body
-      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 150, 0, true), // Body
-      OrangeSquare(LEVEL_X - 50 , LEVEL_Y - 40, 0, true), // Body
-      OrangeSquare(LEVEL_X - 50 , LEVEL_Y + 70, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 370, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 260, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 150, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 40, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y + 70, 0, true), // Body
       YellowDiamond(LEVEL_X - 190, LEVEL_Y - 500, 110, true), //Left Ear
       YellowDiamond(LEVEL_X + 120, LEVEL_Y - 500, 70, true), //Right Ear
-      GreenEquilateralTriangle(LEVEL_X + 85 , LEVEL_Y - 100, 90, true), //Right Middle Wing
-      GreenEquilateralTriangle(LEVEL_X - 85 , LEVEL_Y - 100, 30, true), //Left Middle Wing
-      BlueHexagon(LEVEL_X + 135  , LEVEL_Y - 210, 30, true), //Top Right Wing
-      BlueHexagon(LEVEL_X - 135  , LEVEL_Y - 210, 30, true), //Bottom Right Wing
-      BlueHexagon(LEVEL_X + 135  , LEVEL_Y + 10, 30, true), //Top Left Wing
-      BlueHexagon(LEVEL_X - 135  , LEVEL_Y + 10, 30, true), //Bottom Left Wing
-      GreenEquilateralTriangle(LEVEL_X + 245 , LEVEL_Y - 210, 90, true), //Top Right Wing
-      GreenEquilateralTriangle(LEVEL_X + 245 , LEVEL_Y + 10, 90, true), //Bottom Right Wing
-      GreenEquilateralTriangle(LEVEL_X - 245 , LEVEL_Y - 210, 30, true), //Top Left Wing
-      GreenEquilateralTriangle(LEVEL_X - 245 , LEVEL_Y + 10, 30, true), //Bottom Left Wing
-      PurpleDiamond(LEVEL_X - 10 , LEVEL_Y + 120, 115, true) //Stinger
+      GreenEquilateralTriangle(LEVEL_X + 85, LEVEL_Y - 100, 90, true), //Right Middle Wing
+      GreenEquilateralTriangle(LEVEL_X - 85, LEVEL_Y - 100, 30, true), //Left Middle Wing
+      BlueHexagon(LEVEL_X + 135, LEVEL_Y - 210, 30, true), //Top Right Wing
+      BlueHexagon(LEVEL_X - 135, LEVEL_Y - 210, 30, true), //Bottom Right Wing
+      BlueHexagon(LEVEL_X + 135, LEVEL_Y + 10, 30, true), //Top Left Wing
+      BlueHexagon(LEVEL_X - 135, LEVEL_Y + 10, 30, true), //Bottom Left Wing
+      GreenEquilateralTriangle(LEVEL_X + 245, LEVEL_Y - 210, 90, true), //Top Right Wing
+      GreenEquilateralTriangle(LEVEL_X + 245, LEVEL_Y + 10, 90, true), //Bottom Right Wing
+      GreenEquilateralTriangle(LEVEL_X - 245, LEVEL_Y - 210, 30, true), //Top Left Wing
+      GreenEquilateralTriangle(LEVEL_X - 245, LEVEL_Y + 10, 30, true), //Bottom Left Wing
+      PurpleDiamond(LEVEL_X - 10, LEVEL_Y + 120, 115, true), //Stinger
     ],
   },
 };
 
-//Add Level to canvas
-// shapes.push(...LEVELS[current_level][current_sub_level]);
-
-
-function changeCurrentLevel(level, sub_level){
+function changeCurrentLevel(level, sub_level) {
   current_level = level;
   current_sub_level = sub_level;
 
   //Reset All Shapes on screen
-  shapes = []
+  shapes = [];
 
   //Add Back and Draw needed blocks
   shapes.push(...building_blocks);
   shapes.push(...LEVELS[current_level][current_sub_level]);
 
   //Update UI
-  drawShapes()
-  updateProgressBar()
-
+  drawShapes();
+  updateProgressBar();
 }
-
-//THIS IS WHAT STARTS THE GAME
-changeCurrentLevel(3,1);
-
 
 //====================================
 //          Progress Bar
@@ -1302,15 +1286,28 @@ function postMouseMotionData() {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ data: mouse_motion_array }),
+    body: JSON.stringify({
+      data: mouse_motion_array,
+      level: current_level,
+      userID: getLocalStorageOrNull("userID"),
+    }),
   })
     .then((res) => console.log(res))
     .catch((err) => console.log(err));
 }
 
-//====================================
-//          Block Options
-//====================================
+function postLevelMouseData() {
+  /*
+    This function will post the acculated data of the mouse movements
+    for the current level to the server to create the csv file. It will then
+    reset all of the accumulators
+  */
+
+  console.log("End of motion - ", mouse_motion_array);
+  postMouseMotionData();
+  mouse_motion_accumulator = 0;
+  mouse_motion_array = [];
+}
 
 //====================================
 //      Controls / EventListeners
@@ -1376,15 +1373,21 @@ function mouse_up(event) {
 
   if (current_shape_index === null) return;
 
-  //Reset and Post Mouse Motion
-  console.log("End of motion - ", mouse_motion_array);
-  postMouseMotionData();
-  mouse_motion_accumulator = 0;
-  mouse_motion_array = [];
-
   const shape = shapes[current_shape_index];
   shape.mouseUp();
   current_shape_index = null;
+
+  // Add the identifier for the end of stroke
+  mouse_motion_array.push([
+    "END_OF_STROKE",
+    0,
+    0,
+    getTimestamp(),
+    "END_OF_STROKE",
+    0,
+    0,
+    0,
+  ]);
 }
 
 function mouse_move(event) {
@@ -1444,6 +1447,8 @@ function mouse_move(event) {
         shapes[current_shape_index].type,
         Math.round(accelerationX_in_px_per_s_squared),
         Math.round(accelerationY_in_px_per_s_squared),
+        window.screen.width, // Add screen width to the data
+        window.screen.height,
       ]);
       lastCollectionTime = currentTime;
     }
@@ -1454,9 +1459,17 @@ function mouse_move(event) {
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
-    if (getProgressBarPercentage() == 100) {
-      window.location.href = "/scoring-page"; //Send to scoring page
+  }
+
+  if (getProgressBarPercentage() == 100) {
+    if (mouse_motion_array.length != 0) {
+      postLevelMouseData(); //Create csv
     }
+    setTimeout(() => {}, 1000); // Wait 1s
+    // window.location.href = "/scoring-page"; //Send to scoring page
+    window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
+      "userID"
+    )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
   }
 
   shapes[current_shape_index].mouseMove(x, y);
@@ -1471,17 +1484,6 @@ canvas.addEventListener("mousemove", mouse_move);
 canvas.addEventListener("touchstart", mouse_down);
 canvas.addEventListener("touchend", mouse_up);
 canvas.addEventListener("touchmove", mouse_move);
-
-// canvas.addEventListener("touchstart", (evt) => {
-//   console.log(evt, "Touch Start");
-// });
-
-// canvas.addEventListener("touchend", (evt) => {
-//   console.log(evt, "Touch End");
-// });
-// canvas.addEventListener("touchmove", (evt) => {
-//   console.log(evt, "Touch Move");
-// });
 
 //====================================
 //          Game Functions

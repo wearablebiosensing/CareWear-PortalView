@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect,url_for
+from flask import Flask, render_template, request, jsonify, redirect,url_for, Response
 import firebase_admin
 from firebase_admin import credentials, storage, db
 import pandas as pd
@@ -9,6 +9,15 @@ import re
 import os
 import scipy.signal as signal
 import numpy as np
+
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from datetime import datetime
+
+
 
 
 
@@ -127,17 +136,153 @@ def home():
   return render_template("landing_page.html")
 
 
-@app.route('/tiles-game')
+@app.route('/tiles_game', methods=['GET','POST'])
 def tiles_game():
   return render_template("tiles.html")
 
-@app.route('/scoring-page', methods=['GET','POST'])
-def scoring_page():
-  return render_template("scoring_module.html")
 
-@app.route('/scoring', methods=['GET','POST'])
-def level_complete():
-    return redirect(url_for("scoring_page"))
+# ----------- Routes for the scoring Page -----------------
+
+#Shows renders the scoring page with some parameters
+@app.route('/scoring_page', methods=['GET','POST'])
+def scoring_page():
+    userID = request.args.get('userID')
+    level = int(request.args.get('level'))
+    return render_template("scoring_module.html", userID=userID, level=level)
+
+
+#The scoring page calls to this route when loading to get the graph based on input
+#Here is what the call looks like:      
+# <img src="{{ url_for('scoring_graph', userID=userID, level=level) }}" alt="Scoring Graph"/>
+@app.route('/scoring_graph/<userID>/<level>')
+def scoring_graph(userID, level):
+    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    return Response(plot_mouse_movement(csv_file), mimetype='image/png')
+
+
+# Route to return completion time
+@app.route('/completion_time/<userID>/<level>')
+def completion_time(userID, level):
+    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+
+    level_completion_time = calculate_completion_time(csv_file)
+    return level_completion_time
+
+
+
+#================= Helper Functions =============================
+
+# Function to calculate time taken to complete a level
+def calculate_completion_time(csv_file):
+    timestamps = []
+    
+    with open(csv_file, 'r') as file:
+        csv_reader = csv.DictReader(file)
+        for row in csv_reader:
+            if row['timestamp'] != '0':
+                timestamps.append(row['timestamp'])
+                
+    # Parse the timestamps and calculate the time duration            
+    first_timestamp = timestamps[0]
+    last_timestamp = timestamps[-1]
+    
+    format_str = '%H:%M:%S:%f'
+    first_time = datetime.strptime(first_timestamp, format_str)
+    last_time = datetime.strptime(last_timestamp, format_str)
+    duration = last_time - first_time
+
+    # Convert duration to a formatted string
+    total_seconds = duration.total_seconds()
+    minutes = int(total_seconds // 60)
+    seconds = int(total_seconds % 60)
+    return f"{minutes} minutes {seconds} seconds"
+
+
+
+#Retuns the image data of the mouse movment graph given a csv file
+def plot_mouse_movement(csv_file):
+    colors = {'Square': '#ec940e', 'Circle': '#F29595', 'Right Triangle': '#90C0FF', 'Hexagon': '#1184e2', 'Trapezoid': '#61a962', 'Equilateral Triangle': '#a1e87e', 'Yellow Diamond': '#FFCC4D', 'Purple Diamond': '#9F9AFF'}
+
+
+    df = pd.read_csv(csv_file)
+    strokes = []
+    current_stroke = []
+    unique_shapes = set()  # To keep track of unique shapes
+
+    for _, row in df.iterrows():
+        if row['x'] == "END_OF_STROKE":
+            if current_stroke:
+                strokes.append(current_stroke)
+                current_stroke = []
+        else:
+            current_stroke.append(row)
+            unique_shapes.add(row['shape'])  # Add the shape to the unique_shapes set
+
+    if current_stroke:
+        strokes.append(current_stroke)
+
+    # Set a larger figure size for the graph (adjust the numbers as needed)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.invert_yaxis()  # Flip the y-axis
+
+    for stroke in strokes:
+        if len(stroke) > 1:
+            shape = stroke[-1]['shape']  # Get the shape from the last row of the stroke
+            # screenWidth = stroke[-1]['screenWidth']
+            # screenHeight = stroke[-1]['screenHeight']
+            
+            #Plot Data
+            data = pd.DataFrame(stroke)
+            color = colors.get(shape, 'black')
+            
+            # Convert 'x' values to numeric
+            data['x'] = pd.to_numeric(data['x'])
+            print(data['x'])
+            
+            plt.plot(data['x'], data['y'], color=color, label=shape)
+
+
+
+    plt.xlabel('X Position')
+    plt.ylabel('Y Position')
+    plt.title('Mouse Movement Strokes')
+
+    # Generate a single legend entry for each unique shape
+    handles, labels = ax.get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    unique_legend = [by_label[shape] for shape in unique_shapes]
+    plt.legend(handles=unique_legend, labels=unique_shapes)
+
+    # plt.gca().set_aspect('equal')  # Set aspect ratio to preserve the screen's aspect ratio
+
+
+
+    # Add custom x-ticks with rotation
+    screenWidth = strokes[-1][-1]['screenWidth']  # Get the screenWidth from the last stroke
+    screenHeight = strokes[-1][-1]['screenHeight']  # Get the screenWidth from the last stroke
+    
+        
+    # plt.xlim(0, screenWidth)
+    # plt.ylim(0, screenHeight)
+    
+    # plt.yticks([val for val in range(0, screenHeight + 1, int(screenHeight / 300))],
+    #         [str(val) for val in range(0, screenHeight + 1, int(screenHeight / 300))])
+    # print([val for val in range(0, screenHeight + 1, int(screenHeight / 100))])
+    
+    plt.xticks([val for val in range(0, screenWidth + 1, int(screenWidth / 20))],
+            [str(val) for val in range(0, screenWidth + 1, int(screenWidth / 20))], rotation=90)
+
+    plt.grid()  # Add grid lines for better visualization
+
+    # Convert the plot to a PNG image in memory
+    image_stream = io.BytesIO()
+    FigureCanvas(fig).print_png(image_stream)
+    plt.close(fig)
+
+    # Get the image data as a base64-encoded string
+    image_data = image_stream.getvalue()
+
+    return image_data
 
 
  
@@ -146,13 +291,6 @@ def level_complete():
 
 
 
-
-# Number of data points to accumulate before writing to the CSV file and uploading
-THRESHOLD = 100
-
-# Keep track of accumulated data
-accumulated_data = []
-
 # Specify the directory for the temporary file
 TEMP_FILE_DIRECTORY = './'
 
@@ -160,48 +298,49 @@ TEMP_FILE_DIRECTORY = './'
 def processMouseMovementData():
     res = request.get_json()
     data = res["data"]
-
-    # Accumulate the data
-    accumulated_data.extend(data)
-
+    level = res["level"] #Current level that posted data is from
+    userID = res["userID"] #Used to differentiate csv files from differet subjects
     
+    
+    # Generate a unique prefix for the tempfile using level and userID
+    temp_file_name = f"Level_{level} - user{userID}.csv"
 
-    # Check if the threshold is reached
-    if len(accumulated_data) >= THRESHOLD:
-        print("UPLOADING")
-        # Create a named temporary file in memory
-        with tempfile.NamedTemporaryFile(mode="w+b", delete=False, suffix=".csv", dir=TEMP_FILE_DIRECTORY) as temp_file:
+    # Create a named temporary file in memory
+    # with tempfile.NamedTemporaryFile(prefix=temp_file_prefix, mode="w+b", delete=False, suffix=".csv", dir=TEMP_FILE_DIRECTORY) as temp_file:
+    
+    with open(temp_file_name, mode="w+b") as temp_file:
 
-            
-            # Create the header row
-            header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)']
-            csv_data = [header_row] + accumulated_data
+        
+        # Create the header row
+        header_row = ['x', 'y', 'timestamp', 'shape', 'x(px/s^2)', 'y(px/s^2)', 'screenWidth', 'screenHeight']
+        csv_data = [header_row] + data
 
-            # Convert the accumulated data to a CSV string
-            csv_data = '\n'.join([','.join(map(str, row)) for row in csv_data])
-            csv_data = csv_data.encode('utf-8')
+        # Convert the accumulated data to a CSV string
+        csv_data = '\n'.join([','.join(map(str, row)) for row in csv_data])
+        csv_data = csv_data.encode('utf-8')
 
-            # Write the CSV data to the temporary file
-            temp_file.write(csv_data)
+        # Write the CSV data to the temporary file
+        temp_file.write(csv_data)
 
-            # Reset the file position back to the beginning
-            temp_file.seek(0)
+        # Reset the file position back to the beginning
+        temp_file.seek(0)
 
-            # Upload the CSV file to Firebase Storage
-            #UNCOMMENT BELOW TO UPLOAD TO FIREBASE
-            # bucket = storage.bucket()
-            # file_name = temp_file.name.split('\\')[-1]
-            # print(file_name)
-            # blob = bucket.blob('MagneticTiles/' + file_name)  # Use the temp file name as the blob name
-            # blob.upload_from_file(temp_file)
-            
+        # Upload the CSV file to Firebase Storage
+        #UNCOMMENT BELOW TO UPLOAD TO FIREBASE
+        # bucket = storage.bucket()
+        # file_name = temp_file.name.split('\\')[-1]
+        # print(file_name)
+        # blob = bucket.blob('MagneticTiles/' + file_name)  # Use the temp file name as the blob name
+        # blob.upload_from_file(temp_file)
+        
 
-
-        # Clear the accumulated data
-        accumulated_data.clear()
 
     response = {'message': 'Data received and processed successfully'}
     return jsonify(response)
+
+
+
+
 
 #root = "/Users/shehjarsadhu/Desktop/11-07-2023"
 #file_list = os.listdir(root)

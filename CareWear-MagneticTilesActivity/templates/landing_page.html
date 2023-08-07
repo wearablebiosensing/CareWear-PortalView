@@ -26,20 +26,35 @@
 
       <div class="input-wrapper">
         <div class="input-container">
-          <input type="text" placeholder="Watch ID" />
+          <input type="text" placeholder="Watch ID" id="userID" />
         </div>
-        <div class="input-container">
+        <!-- <div class="input-container">
           <select>
             <option value="" disabled selected>Select Mouse Type</option>
             <option value="option1">Trackpad</option>
             <option value="option2">Mouse</option>
             <option value="option3">Other</option>
           </select>
-        </div>
-        <a href="{{ url_for('tiles_game') }}"
-          ><button type="submit">Submit</button></a
-        >
+        </div> -->
+        <!-- <a href="{{ url_for('tiles_game') }}" -->
+        <button type="submit" id="submitBtn" required>Submit</button>
       </div>
     </div>
+
+    <script>
+      const submitBtn = document.getElementById("submitBtn");
+      const ID_Input = document.getElementById("userID");
+
+      submitBtn.addEventListener("click", () => {
+        if (!ID_Input.value.match(/\S/)) {
+          alert("Field is blank");
+        } else {
+          localStorage.setItem("userID", ID_Input.value);
+          localStorage.setItem("currentLevel", 1);
+
+          window.location.href = "/tiles_game"; //Send to game
+        }
+      });
+    </script>
   </body>
 </html>
