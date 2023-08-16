@@ -348,4 +348,3 @@ def processMouseMovementData():
 # local_file_read(file_list,root)
 #read_csv_from_firebase()
 # file_count_json = read_csv_from_firebase()
-

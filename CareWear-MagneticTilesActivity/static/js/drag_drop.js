@@ -11,7 +11,7 @@ class Shape {
     this.isLevelShape = isLevelShape; // Flag to indicate if it's a special shape
     this.isLevelShapeFilled = false; //Flag to indicate if a level shape is already filled
     this.isSnapped = false; // Flag to track if a shape is snapped to this target
-    this.snapDistanceThreshold = 50; //Flag to indicate how close a shape must be to Level shape to snap to it
+    this.snapDistanceThreshold = 20; //Flag to indicate how close a shape must be to Level shape to snap to it
 
     this.isBuildingBlock = isBuildingBlock;
   }
@@ -25,7 +25,7 @@ class Shape {
 
   checkRotationThreshold(targetShape, equivalentRotations = [0]) {
     const rotationDifference = Math.abs(this.rotation - targetShape.rotation);
-    const rotationThreshold = 300;
+    const rotationThreshold = 340;
 
     for (const angle of equivalentRotations) {
       const difference = Math.abs(rotationDifference - angle);
@@ -1280,8 +1280,9 @@ function getTimestamp() {
   return formattedTimestamp;
 }
 
-function postMouseMotionData() {
-  fetch("/process-mouse-data", {
+async function postMouseMotionData() {
+  console.log("Fetch - ", mouse_motion_array);
+  await fetch("/process-mouse-data", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -1291,20 +1292,18 @@ function postMouseMotionData() {
       level: current_level,
       userID: getLocalStorageOrNull("userID"),
     }),
-  })
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err));
+  });
 }
 
-function postLevelMouseData() {
+async function postLevelMouseData() {
   /*
     This function will post the acculated data of the mouse movements
     for the current level to the server to create the csv file. It will then
     reset all of the accumulators
   */
 
-  console.log("End of motion - ", mouse_motion_array);
-  postMouseMotionData();
+  console.log("POST - ", mouse_motion_array);
+  await postMouseMotionData();
   mouse_motion_accumulator = 0;
   mouse_motion_array = [];
 }
@@ -1462,10 +1461,10 @@ function mouse_move(event) {
   }
 
   if (getProgressBarPercentage() == 100) {
-    if (mouse_motion_array.length != 0) {
+    if (mouse_motion_array.length != 0 && mouse_motion_array.length > 5) {
       postLevelMouseData(); //Create csv
     }
-    setTimeout(() => {}, 1000); // Wait 1s
+    setTimeout(() => {}, 2500); // Wait 2.5s
     // window.location.href = "/scoring-page"; //Send to scoring page
     window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
       "userID"
@@ -1473,7 +1472,6 @@ function mouse_move(event) {
   }
 
   shapes[current_shape_index].mouseMove(x, y);
-
   drawShapes();
 }
 
