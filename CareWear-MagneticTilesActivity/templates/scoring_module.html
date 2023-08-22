@@ -20,20 +20,55 @@
       img {
         display: block;
         margin: 0 auto;
-        max-width: 70%;
-        height: auto;
+        max-width: 90%;
+        height: 100%;
+        box-shadow: 2px 5px 33px -21px rgba(0, 0, 0, 0.75);
+        border-radius: 10px;
+        /*min-height: auto;*/
       }
       div {
         text-align: center;
-        margin: 20px;
+        margin: 10px;
         font-size: 18px;
       }
+
+      .user_ID {
+        font-size: 3em;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+          "Lucida Sans", Arial, sans-serif;
+      }
+
+      .complete_time_wrapper {
+        font-size: 1.5em;
+        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+          sans-serif;
+        margin-top: 30px;
+      }
+
+      .completion_time {
+        font-weight: bold;
+      }
+
+      .single_graph_wrapper {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .graph_title {
+        font-size: 1.5em;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
+
       #next_level {
         display: block;
         margin: 0 auto;
-        padding: 10px 20px;
+        padding: 15px 35px;
         font-size: 16px;
         background-color: #007bff;
+        border-radius: 15px;
         color: #fff;
         border: none;
         cursor: pointer;
@@ -42,17 +77,57 @@
       #next_level:hover {
         background-color: #0056b3;
       }
+
+      .graph_container {
+        display: flex;
+        justify-content: center;
+      }
+
+      .image-container {
+        flex: 1;
+      }
     </style>
   </head>
   <body>
-    <h1>{{ userID }}</h1>
-    <h1>Scoring Graph</h1>
-    <img
-      src="{{ url_for('scoring_graph', userID=userID, level=level) }}"
-      alt="Scoring Graph"
-    />
+    <div class="user_ID">{{ userID }}</div>
 
-    <div>It took <span id="completion_time"></span> to complete this Level</div>
+    <!-- Graphs -->
+    <div class="graph_container">
+      <div class="single_graph_wrapper">
+        <div class="graph_title">Mouse Movement</div>
+        <div
+          class="image-container"
+          id="mouse_movement_graph"
+          data-endpoint="mouse_movement_graph"
+        >
+          <div class="loading" style="display: none">Loading...</div>
+          <div class="error" style="display: none; color: red">
+            Error loading graph.
+          </div>
+          <img class="image" alt="Image 1" style="display: none" />
+        </div>
+      </div>
+
+      <div class="single_graph_wrapper">
+        <div class="graph_title">Acceleration</div>
+
+        <div
+          class="image-container"
+          id="acceleration_graph"
+          data-endpoint="acceleration_graph"
+        >
+          <div class="loading" style="display: none">Loading...</div>
+          <div class="error" style="display: none; color: red">
+            Error loading graph.
+          </div>
+          <img class="image" alt="Image 1" style="display: none" />
+        </div>
+      </div>
+    </div>
+
+    <div class="complete_time_wrapper">
+      It took <span id="completion_time"></span> to complete this Level
+    </div>
 
     <!-- Depending on what level user is on, change where to redirect -->
     {% if level < 3 %}
@@ -64,7 +139,9 @@
     {% endif %}
 
     <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
-    <script>
+    <script src="{{ url_for('static', filename='js/scoring_page.js') }}"></script>
+
+    <!-- <script>
       // Update localStorage so that the next level is displayed on tiles_game page
       const nextLevelBtn = document.getElementById("next_level");
       nextLevelBtn.addEventListener("click", () => {
@@ -88,6 +165,6 @@
         .catch((error) => {
           console.error("Error fetching completion time:", error);
         });
-    </script>
+    </script> -->
   </body>
 </html>

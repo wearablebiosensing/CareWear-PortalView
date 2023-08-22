@@ -17,6 +17,8 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from datetime import datetime
 
+import threading
+csv_lock = threading.Lock()
 
 
 
@@ -152,12 +154,20 @@ def scoring_page():
 
 
 #The scoring page calls to this route when loading to get the graph based on input
-#Here is what the call looks like:      
-# <img src="{{ url_for('scoring_graph', userID=userID, level=level) }}" alt="Scoring Graph"/>
-@app.route('/scoring_graph/<userID>/<level>')
+@app.route('/mouse_movement_graph/<userID>/<level>')
 def scoring_graph(userID, level):
     csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
-    return Response(plot_mouse_movement(csv_file), mimetype='image/png')
+    with csv_lock:
+        image_data = plot_mouse_movement(csv_file)
+    return Response(image_data, mimetype='image/png')
+
+
+@app.route('/acceleration_graph/<userID>/<level>')
+def acceleration_graph(userID, level):
+    csv_file = f"Level_{level} - user{userID}.csv"  # Adjust the file naming pattern as needed
+    with csv_lock:
+        image_data = plot_acceleration_data(csv_file)
+    return Response(image_data, mimetype='image/png')
 
 
 # Route to return completion time
@@ -167,6 +177,8 @@ def completion_time(userID, level):
 
     level_completion_time = calculate_completion_time(csv_file)
     return level_completion_time
+
+
 
 
 
@@ -196,6 +208,9 @@ def calculate_completion_time(csv_file):
     minutes = int(total_seconds // 60)
     seconds = int(total_seconds % 60)
     return f"{minutes} minutes {seconds} seconds"
+
+
+
 
 
 
@@ -237,7 +252,7 @@ def plot_mouse_movement(csv_file):
             
             # Convert 'x' values to numeric
             data['x'] = pd.to_numeric(data['x'])
-            print(data['x'])
+            # print(data['x'])
             
             plt.plot(data['x'], data['y'], color=color, label=shape)
 
@@ -262,17 +277,51 @@ def plot_mouse_movement(csv_file):
     screenHeight = strokes[-1][-1]['screenHeight']  # Get the screenWidth from the last stroke
     
         
-    # plt.xlim(0, screenWidth)
-    # plt.ylim(0, screenHeight)
-    
-    # plt.yticks([val for val in range(0, screenHeight + 1, int(screenHeight / 300))],
-    #         [str(val) for val in range(0, screenHeight + 1, int(screenHeight / 300))])
-    # print([val for val in range(0, screenHeight + 1, int(screenHeight / 100))])
     
     plt.xticks([val for val in range(0, screenWidth + 1, int(screenWidth / 20))],
             [str(val) for val in range(0, screenWidth + 1, int(screenWidth / 20))], rotation=90)
 
     plt.grid()  # Add grid lines for better visualization
+
+    # Convert the plot to a PNG image in memory
+    image_stream = io.BytesIO()
+    FigureCanvas(fig).print_png(image_stream)
+    plt.close(fig)
+
+    # Get the image data as a base64-encoded string
+    image_data = image_stream.getvalue()
+    
+
+    return image_data
+
+
+
+
+def plot_acceleration_data(csv_file):
+    df = pd.read_csv(csv_file)
+
+    # Remove rows with 'END_OF_STROKE' entries
+    df = df[df['x(px/s^2)'] != 'END_OF_STROKE']
+
+    # Convert timestamp column to datetime format
+    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%H:%M:%S:%f')
+
+    # Convert acceleration columns to numeric values
+    df['x(px/s^2)'] = pd.to_numeric(df['x(px/s^2)'])
+    df['y(px/s^2)'] = pd.to_numeric(df['y(px/s^2)'])
+
+    # Create a new figure
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot acceleration x and y over time
+    ax.plot(df['timestamp'], df['x(px/s^2)'], label='Acceleration x')
+    ax.plot(df['timestamp'], df['y(px/s^2)'], label='Acceleration y')
+
+    # Set plot labels and title
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Acceleration')
+    ax.set_title(f'Acceleration x and y over Time - {csv_file}')
+    ax.legend()
 
     # Convert the plot to a PNG image in memory
     image_stream = io.BytesIO()
