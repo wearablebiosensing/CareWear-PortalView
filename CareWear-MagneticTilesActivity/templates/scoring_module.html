@@ -87,6 +87,13 @@
         flex: 1;
       }
     </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+        <script>
+            const socket = io.connect('http://' + document.domain + ':' + location.port);
+            socket.on('mqtt_message', function(msg) {
+                document.getElementById('mqtt-data').innerHTML = msg.data;
+            });
+        </script>
   </head>
   <body>
     <div class="user_ID">{{ userID }}</div>
@@ -110,8 +117,12 @@
 
       <div class="single_graph_wrapper">
         <div class="graph_title">Acceleration</div>
-
-        <div
+        <div class="complete_time_wrapper">
+          It took <span id="completion_time"></span> to complete this Level
+        </div>
+        <div>Received MQTT Data:</div>
+        <div id="mqtt-data"></div>
+        <!-- <div
           class="image-container"
           id="acceleration_graph"
           data-endpoint="acceleration_graph"
@@ -121,14 +132,12 @@
             Error loading graph.
           </div>
           <img class="image" alt="Image 1" style="display: none" />
-        </div>
+        </div> -->
       </div>
     </div>
 
-    <div class="complete_time_wrapper">
-      It took <span id="completion_time"></span> to complete this Level
-    </div>
-
+   
+    
     <!-- Depending on what level user is on, change where to redirect -->
     {% if level < 3 %}
     <a href="{{ url_for('tiles_game') }}"
@@ -141,30 +150,5 @@
     <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/scoring_page.js') }}"></script>
 
-    <!-- <script>
-      // Update localStorage so that the next level is displayed on tiles_game page
-      const nextLevelBtn = document.getElementById("next_level");
-      nextLevelBtn.addEventListener("click", () => {
-        let current_level = Number(localStorage.getItem("currentLevel"));
-        localStorage.setItem("currentLevel", current_level + 1); // Next Level
-      });
-
-      // Global Constants
-      const userID = getLocalStorageOrNull("userID");
-      const level = getLocalStorageOrNull("currentLevel");
-      const completetion_time_display =
-        document.getElementById("completion_time");
-
-      // Make a fetch request to the completion-time endpoint
-      fetch(`/completion_time/${userID}/${level}`)
-        .then((response) => response.text())
-        .then((completionTime) => {
-          // Display the completion time on the page
-          completetion_time_display.textContent = completionTime;
-        })
-        .catch((error) => {
-          console.error("Error fetching completion time:", error);
-        });
-    </script> -->
   </body>
 </html>

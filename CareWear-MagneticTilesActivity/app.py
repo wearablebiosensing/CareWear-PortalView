@@ -1,27 +1,25 @@
-from flask import Flask, render_template, request, jsonify, redirect,url_for, Response
-import firebase_admin
-from firebase_admin import credentials, storage, db
-import pandas as pd
 import io
 import tempfile
 import csv
 import re
 import os
-import scipy.signal as signal
-import numpy as np
+from datetime import datetime
 
+from flask import Flask, render_template, request, jsonify, redirect,url_for, Response
+import firebase_admin
+from firebase_admin import credentials, storage, db
 import pandas as pd
+import numpy as np
+import scipy.signal as signal
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from datetime import datetime
-
+from flask_socketio import SocketIO
+import paho.mqtt.client as mqtt
+# pip3 install -r flask firebase-admin pandas scipy numpy matplotlib
 import threading
 csv_lock = threading.Lock()
-
-
-
 
 app = Flask(__name__)
 root = "/Users/shehjarsadhu/Desktop/UniversityOfRhodeIsland/Graduate/WBL/Project_Carehub/CareWear-PortalView/CareWear-MagneticTilesActivity/"
@@ -42,6 +40,32 @@ firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://carewear-77d8e-default-rtdb.firebaseio.com/'
 })
 ref = db.reference('/sensors_message')  # Path to your sensor data node in the database
+socketio = SocketIO(app)
+
+# MQTT callback functions
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT broker")
+        client.subscribe("M5StackcPlus/acceleration")  # Subscribe to the MQTT topic
+
+def on_message(client, userdata, message):
+    data = message.payload.decode()
+    print(f"Received message: {data}")
+    socketio.emit('mqtt_message', {'data': data})
+
+mqtt_client = mqtt.Client()
+mqtt_client.on_connect = on_connect
+mqtt_client.on_message = on_message
+mqtt_client.connect("test.mosquitto.org", 1883)
+
+@app.route('/mqtt_connect_page')
+def mqtt_connect():
+    return render_template('mqtt_template.html')
+
+@socketio.on('connect')
+def handle_connect():
+    print('WebSocket connected')
+
 ## For each individual file within the Watch folder Eg: 638116435299306610_30hz.csv
 ## Quality check for each file get the parameters and write to a results file.
 # per_watch - is a list of CSV files in a folder.
@@ -178,10 +202,6 @@ def completion_time(userID, level):
     level_completion_time = calculate_completion_time(csv_file)
     return level_completion_time
 
-
-
-
-
 #================= Helper Functions =============================
 
 # Function to calculate time taken to complete a level
@@ -208,11 +228,6 @@ def calculate_completion_time(csv_file):
     minutes = int(total_seconds // 60)
     seconds = int(total_seconds % 60)
     return f"{minutes} minutes {seconds} seconds"
-
-
-
-
-
 
 #Retuns the image data of the mouse movment graph given a csv file
 def plot_mouse_movement(csv_file):
@@ -294,9 +309,6 @@ def plot_mouse_movement(csv_file):
 
     return image_data
 
-
-
-
 def plot_acceleration_data(csv_file):
     df = pd.read_csv(csv_file)
 
@@ -332,13 +344,6 @@ def plot_acceleration_data(csv_file):
     image_data = image_stream.getvalue()
 
     return image_data
-
-
- 
-
-
-
-
 
 # Specify the directory for the temporary file
 TEMP_FILE_DIRECTORY = './'
@@ -381,19 +386,11 @@ def processMouseMovementData():
         # print(file_name)
         # blob = bucket.blob('MagneticTiles/' + file_name)  # Use the temp file name as the blob name
         # blob.upload_from_file(temp_file)
-        
-
-
     response = {'message': 'Data received and processed successfully'}
     return jsonify(response)
 
 
 
-
-
-#root = "/Users/shehjarsadhu/Desktop/11-07-2023"
-#file_list = os.listdir(root)
-#print("file_list: ",file_list)
-# local_file_read(file_list,root)
-#read_csv_from_firebase()
-# file_count_json = read_csv_from_firebase()
+if __name__ == '__main__':
+    mqtt_client.loop_start()
+    socketio.run(app, debug=True)

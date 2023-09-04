@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Website Title</title>
+    <title>Mind Game</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/global.css') }}"
@@ -19,7 +19,7 @@
         <!-- Shows what level user is on -->
         <p class="subtitle">Level <span id="level"></span></p>
 
-        <div>User ID: <span id="userID"></span></div>
+        <!-- <div>User ID: <span id="userID"></span></div> -->
 
         <!-- Popup to give users directions about the game -->
         <div class="help-icon-wrapper" id="help-icon">
@@ -61,6 +61,7 @@
         <input type="checkbox" class="mouse-data-icon" id="mouse-data" />
       </header>
       <main>
+
         <div class="canvas-container" id="container">
           <canvas id="canvas"></canvas>
         </div>

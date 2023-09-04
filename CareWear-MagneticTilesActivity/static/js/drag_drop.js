@@ -3,6 +3,7 @@ class Shape {
     this.x = x;
     this.y = y;
     this.color = color;
+    this.doneColor = "#478F96";
     this.rotation = 0; //Maybe this.rotation = rotate(rotation)
     this.rotate(rotation);
     this.isDragging = false;
@@ -127,7 +128,7 @@ class Square extends Shape {
     ctx.save(); // Save the current transformation state
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2); // Translate the coordinate system to the center of the square
     ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color; 
     ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height); // Draw the square centered at the translated coordinates
     ctx.restore(); // Restore the previous transformation state
   }
@@ -190,7 +191,7 @@ class Circle extends Shape {
 
   draw() {
     ctx.beginPath();
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
@@ -269,7 +270,7 @@ class Trapezoid extends Shape {
     ctx.lineTo(-bottomWidth / 2, halfHeight);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore();
@@ -374,7 +375,7 @@ class RightTriangle extends Shape {
     ctx.lineTo(-this.base / 2, this.height / 2);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore(); // Restore the previous transformation state
@@ -485,7 +486,7 @@ class Diamond extends Shape {
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
     ctx.rotate((Math.PI / 180) * this.rotation);
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.beginPath();
     ctx.moveTo(-this.width / 2, 0);
     ctx.lineTo(0, -this.height / 2);
@@ -580,7 +581,7 @@ class EquilateralTriangle extends Shape {
     ctx.lineTo(0, -(Math.sqrt(3) / 3) * this.sideLength);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore();
@@ -704,7 +705,7 @@ class Hexagon extends Shape {
     }
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore(); // Restore the previous transformation state
@@ -794,7 +795,7 @@ class QuarterCircle extends Shape {
     ctx.lineTo(0, 0);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore();
@@ -862,7 +863,7 @@ function OrangeSquare(
   isBuildingBlock = false
 ) {
   const SQUARE_SIZE = 100;
-  let color = isLevelTile ? "grey" : "#ffc061";
+  let color = isLevelTile ? "#D9D9D9" : "#ffc061";
   return new Square(
     x,
     y,
@@ -883,7 +884,7 @@ function RedCircle(
   isBuildingBlock = false
 ) {
   const CIRCLE_RADIUS = 50;
-  let color = isLevelTile ? "grey" : "#F29595";
+  let color = isLevelTile ? "#D9D9D9" : "#F29595";
   return new Circle(
     x,
     y,
@@ -904,7 +905,7 @@ function BlueRightTriangle(
 ) {
   const BASE = 100;
   const HEIGHT = 100;
-  let color = isLevelTile ? "grey" : "#90C0FF";
+  let color = isLevelTile ? "#D9D9D9" : "#90C0FF";
   return new RightTriangle(
     x,
     y,
@@ -926,7 +927,7 @@ function GreenTrapezoid(
 ) {
   const BASE = 200;
   const HEIGHT = 100;
-  let color = isLevelTile ? "grey" : "#61a962";
+  let color = isLevelTile ? "#D9D9D9" : "#61a962";
   return new Trapezoid(
     x,
     y,
@@ -947,7 +948,7 @@ function GreenEquilateralTriangle(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 95;
-  let color = isLevelTile ? "grey" : "#a1e87e";
+  let color = isLevelTile ? "#D9D9D9" : "#a1e87e";
   return new EquilateralTriangle(
     x,
     y,
@@ -967,7 +968,7 @@ function BlueHexagon(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 100;
-  let color = isLevelTile ? "grey" : "#1184e2";
+  let color = isLevelTile ? "#D9D9D9" : "#1184e2";
 
   return new Hexagon(
     x,
@@ -989,7 +990,7 @@ function YellowDiamond(
 ) {
   const WIDTH = 70;
   const HEIGHT = 200;
-  let color = isLevelTile ? "grey" : "#FFCC4D";
+  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
 
   return new Diamond(
     x,
@@ -1013,7 +1014,7 @@ function PurpleDiamond(
 ) {
   const WIDTH = 100;
   const HEIGHT = 200;
-  let color = isLevelTile ? "grey" : "#9F9AFF";
+  let color = isLevelTile ? "#D9D9D9" : "#9F9AFF";
 
   return new Diamond(
     x,
@@ -1036,7 +1037,7 @@ function PinkQuarterCircle(
   isBuildingBlock = false
 ) {
   const RADIUS = 100;
-  let color = isLevelTile ? "grey" : "#f5a8f3";
+  let color = isLevelTile ? "#D9D9D9" : "#f5a8f3";
   return new QuarterCircle(
     x,
     y,
@@ -1109,7 +1110,7 @@ let prevTimestamp = 0;
 
 // Create an array with instances of different shapes
 const building_blocks = [
-  OrangeSquare((canvas.width * 0.25) / 4 - 20, 10, 0, false, true),
+  OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
   RedCircle((canvas.width * 0.25) / 2, 10, 0, false, true),
   GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
   BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),

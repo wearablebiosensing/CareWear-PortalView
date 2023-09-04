@@ -121,7 +121,7 @@ canvas {
 
 .progress-bar-inner {
   height: 100%;
-  background-color: #478f96;
+  background-color: #478f96; 
   width: 0%;
   transition: width 0.3s ease-in-out;
 }
