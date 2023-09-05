@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Website Title</title>
+    <title>Mind Game</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/global.css') }}"
@@ -15,30 +15,20 @@
   </head>
   <body>
     <div class="container">
-      <div class="mouse-data">
-        Current Window - X : <span id="currentWindowX"></span> px<br />
-        Current Window - Y : <span id="currentWindowY"></span> px<br />
-        Movement - X : <span id="movementX"></span> px<br />
-        Movement - Y : <span id="movementY"></span> px<br />
-        Movement : <span id="movement"></span> px<br />
-        Speed : <span id="speed"></span> px/s<br />
-        Max. Speed : <span id="maxSpeed"></span> px/s<br />
-        Acceleration : <span id="acceleration"></span> px/s<sup>2</sup><br />
-        Max. Positive Acceleration :
-        <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
-        Max. Negative Acceleration :
-        <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
-      </div>
       <header>
-        <!-- <h1 class="title">Magnetic Tiles Activity</h1> -->
-        <p class="subtitle">Level <span id="level"></span></p>
-        <!-- <input id="canvas-scale" type="range" min="1" max="500" value="300" /> -->
+            <!-- Shows what level user is on -->
+            <p >Level <span id="level"></span></p>
+
+            <div>User ID: <span id="userID"></span> </div>
+    
+        <!-- Popup to give users directions about the game -->
         <div class="help-icon-wrapper" id="help-icon">
           <img
             src="{{ url_for('static', filename='images/info-circle.svg') }}"
             alt="Help Icon"
           />
-          <div class="popup" id="popup">
+
+          <div class="popup" id="directions_popup">
             <div class="directions">
               <div class="key">
                 <img
@@ -66,12 +56,33 @@
             </div>
           </div>
         </div>
+
+        <!-- Button to toggle mouse statistics -->
+        <input type="checkbox" class="mouse-data-icon" id="mouse-data" />
       </header>
       <main>
+
         <div class="canvas-container" id="container">
           <canvas id="canvas"></canvas>
         </div>
       </main>
+
+      <!-- Mouse Statistics Data -->
+      <div class="mouse-data" id="mouse_popup">
+        Current Window - X : <span id="currentWindowX"></span> px<br />
+        Current Window - Y : <span id="currentWindowY"></span> px<br />
+        Movement - X : <span id="movementX"></span> px<br />
+        Movement - Y : <span id="movementY"></span> px<br />
+        Movement : <span id="movement"></span> px<br />
+        Speed : <span id="speed"></span> px/s<br />
+        Max. Speed : <span id="maxSpeed"></span> px/s<br />
+        Acceleration X : <span id="accelerationX"></span> px/s<sup>2</sup><br />
+        Acceleration Y : <span id="accelerationY"></span> px/s<sup>2</sup><br />
+        Max. Positive Acceleration :
+        <span id="maxPositiveAcceleration"></span> px/s<sup>2</sup><br />
+        Max. Negative Acceleration :
+        <span id="maxNegativeAcceleration"></span> px/s<sup>2</sup><br />
+      </div>
     </div>
 
     <!-- Progress Bar -->
@@ -85,5 +96,20 @@
     <script src="{{ url_for('static', filename='js/popup.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mouse_movement.js') }}"></script>
     <script src="{{ url_for('static', filename='js/drag_drop.js') }}"></script>
+
+    <script>
+      const userID_display = document.getElementById("userID");
+      const currentLevel_display = document.getElementById("level");
+
+      /*This function comes from drag_drop.js
+      Make sure it is included before this is called*/
+      //This function will change the specific level user is on
+      const currentLevel = Number(getLocalStorageOrNull("currentLevel"));
+      changeCurrentLevel(currentLevel, 1); //NOTHING WILL WORK WITHOUT THIS
+
+      //Update text on page
+      userID_display.innerText = getLocalStorageOrNull("userID");
+      currentLevel_display.innerText = currentLevel;
+    </script>
   </body>
 </html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"> 
+    <title>MQTT Messages</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('mqtt_message', function(msg) {
+            document.getElementById('mqtt-data').innerHTML = msg.data;
+        });
+    </script>
+</head>
+<body>
+    <h1>Received MQTT Data:</h1>
+    <p id="mqtt-data"></p>
+</body>
+</html>

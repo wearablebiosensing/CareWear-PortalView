@@ -1,12 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Scoring Module</title>
-</head>
-<body>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+        color: #333;
+      }
+      h1 {
+        margin: 20px;
+        font-size: 24px;
+        text-align: center;
+      }
+      img {
+        display: block;
+        margin: 0 auto;
+        max-width: 90%;
+        height: 100%;
+        box-shadow: 2px 5px 33px -21px rgba(0, 0, 0, 0.75);
+        border-radius: 10px;
+        /*min-height: auto;*/
+      }
+      div {
+        text-align: center;
+        margin: 10px;
+        font-size: 18px;
+      }
+
+      .user_ID {
+        font-size: 3em;
+        font-weight: bold;
+        padding: 10px 20px;
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+          "Lucida Sans", Arial, sans-serif;
+      }
+
+      .complete_time_wrapper {
+        font-size: 1.5em;
+        font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+          sans-serif;
+        margin-top: 30px;
+      }
+
+      .completion_time {
+        font-weight: bold;
+      }
+
+      .single_graph_wrapper {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      .graph_title {
+        font-size: 1.5em;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
+
+      #next_level {
+        display: block;
+        margin: 0 auto;
+        padding: 15px 35px;
+        font-size: 16px;
+        background-color: #007bff;
+        border-radius: 15px;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      #next_level:hover {
+        background-color: #0056b3;
+      }
+
+      .graph_container {
+        display: flex;
+        justify-content: center;
+      }
+
+      .image-container {
+        flex: 1;
+      }
+    </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+        <script>
+            const socket = io.connect('http://' + document.domain + ':' + location.port);
+            socket.on('mqtt_message', function(msg) {
+                document.getElementById('mqtt-data').innerHTML = msg.data;
+            });
+        </script>
+  </head>
+  <body>
+    <div class="user_ID">{{ userID }}</div>
+
+    <!-- Graphs -->
+    <div class="graph_container">
+      <div class="single_graph_wrapper">
+        <div class="graph_title">Mouse Movement</div>
+        <div
+          class="image-container"
+          id="mouse_movement_graph"
+          data-endpoint="mouse_movement_graph"
+        >
+          <div class="loading" style="display: none">Loading...</div>
+          <div class="error" style="display: none; color: red">
+            Error loading graph.
+          </div>
+          <img class="image" alt="Image 1" style="display: none" />
+        </div>
+      </div>
+
+      <div class="single_graph_wrapper">
+        <div class="graph_title">Acceleration</div>
+        <div class="complete_time_wrapper">
+          It took <span id="completion_time"></span> to complete this Level
+        </div>
+        <div>Received MQTT Data:</div>
+        <div id="mqtt-data"></div>
+        <!-- <div
+          class="image-container"
+          id="acceleration_graph"
+          data-endpoint="acceleration_graph"
+        >
+          <div class="loading" style="display: none">Loading...</div>
+          <div class="error" style="display: none; color: red">
+            Error loading graph.
+          </div>
+          <img class="image" alt="Image 1" style="display: none" />
+        </div> -->
+      </div>
+    </div>
+
+   
     
-    
-</body>
+    <!-- Depending on what level user is on, change where to redirect -->
+    {% if level < 3 %}
+    <a href="{{ url_for('tiles_game') }}"
+      ><button id="next_level">Next Level</button></a
+    >
+    {% else %}
+    <a href="{{ url_for('home') }}"><button id="next_level">Finish</button></a>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/helper_functions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scoring_page.js') }}"></script>
+
+  </body>
 </html>

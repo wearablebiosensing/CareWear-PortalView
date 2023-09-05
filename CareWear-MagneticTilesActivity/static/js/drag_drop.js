@@ -3,6 +3,8 @@ class Shape {
     this.x = x;
     this.y = y;
     this.color = color;
+    // color when the shapes are done matching.
+    this.doneColor = "#478F96";
     this.rotation = 0; //Maybe this.rotation = rotate(rotation)
     this.rotate(rotation);
     this.isDragging = false;
@@ -127,7 +129,7 @@ class Square extends Shape {
     ctx.save(); // Save the current transformation state
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2); // Translate the coordinate system to the center of the square
     ctx.rotate((Math.PI / 180) * this.rotation); // Rotate the coordinate system by the specified angle
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color; 
     ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height); // Draw the square centered at the translated coordinates
     ctx.restore(); // Restore the previous transformation state
   }
@@ -190,7 +192,7 @@ class Circle extends Shape {
 
   draw() {
     ctx.beginPath();
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
     ctx.closePath();
@@ -269,7 +271,7 @@ class Trapezoid extends Shape {
     ctx.lineTo(-bottomWidth / 2, halfHeight);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore();
@@ -374,7 +376,7 @@ class RightTriangle extends Shape {
     ctx.lineTo(-this.base / 2, this.height / 2);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore(); // Restore the previous transformation state
@@ -485,7 +487,7 @@ class Diamond extends Shape {
     ctx.save();
     ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
     ctx.rotate((Math.PI / 180) * this.rotation);
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.beginPath();
     ctx.moveTo(-this.width / 2, 0);
     ctx.lineTo(0, -this.height / 2);
@@ -580,7 +582,7 @@ class EquilateralTriangle extends Shape {
     ctx.lineTo(0, -(Math.sqrt(3) / 3) * this.sideLength);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore();
@@ -704,7 +706,7 @@ class Hexagon extends Shape {
     }
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore(); // Restore the previous transformation state
@@ -794,7 +796,7 @@ class QuarterCircle extends Shape {
     ctx.lineTo(0, 0);
     ctx.closePath();
 
-    ctx.fillStyle = this.isSnapped ? "green" : this.color;
+    ctx.fillStyle = this.isSnapped ? this.doneColor : this.color;
     ctx.fill();
 
     ctx.restore();
@@ -862,7 +864,7 @@ function OrangeSquare(
   isBuildingBlock = false
 ) {
   const SQUARE_SIZE = 100;
-  let color = isLevelTile ? "grey" : "#ffc061";
+  let color = isLevelTile ? "#D9D9D9" : "#65A7FF";
   return new Square(
     x,
     y,
@@ -883,7 +885,7 @@ function RedCircle(
   isBuildingBlock = false
 ) {
   const CIRCLE_RADIUS = 50;
-  let color = isLevelTile ? "grey" : "#F29595";
+  let color = isLevelTile ? "#D9D9D9" : "#F08C8C";
   return new Circle(
     x,
     y,
@@ -904,7 +906,7 @@ function BlueRightTriangle(
 ) {
   const BASE = 100;
   const HEIGHT = 100;
-  let color = isLevelTile ? "grey" : "#90C0FF";
+  let color = isLevelTile ? "#D9D9D9" : "#968FFF";
   return new RightTriangle(
     x,
     y,
@@ -926,7 +928,7 @@ function GreenTrapezoid(
 ) {
   const BASE = 200;
   const HEIGHT = 100;
-  let color = isLevelTile ? "grey" : "#61a962";
+  let color = isLevelTile ? "#D9D9D9" : "#6D14A4";
   return new Trapezoid(
     x,
     y,
@@ -947,7 +949,7 @@ function GreenEquilateralTriangle(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 95;
-  let color = isLevelTile ? "grey" : "#a1e87e";
+  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
   return new EquilateralTriangle(
     x,
     y,
@@ -967,7 +969,7 @@ function BlueHexagon(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 100;
-  let color = isLevelTile ? "grey" : "#1184e2";
+  let color = isLevelTile ? "#D9D9D9" : "#82D1FE";
 
   return new Hexagon(
     x,
@@ -989,7 +991,7 @@ function YellowDiamond(
 ) {
   const WIDTH = 70;
   const HEIGHT = 200;
-  let color = isLevelTile ? "grey" : "#FFCC4D";
+  let color = isLevelTile ? "#D9D9D9" : "#81E5DB";
 
   return new Diamond(
     x,
@@ -1011,9 +1013,10 @@ function PurpleDiamond(
   isLevelTile = false,
   isBuildingBlock = false
 ) {
+  // TODO: Change this.
   const WIDTH = 100;
   const HEIGHT = 200;
-  let color = isLevelTile ? "grey" : "#9F9AFF";
+  let color = isLevelTile ? "#D9D9D9" : "#9F9AFF";
 
   return new Diamond(
     x,
@@ -1036,7 +1039,7 @@ function PinkQuarterCircle(
   isBuildingBlock = false
 ) {
   const RADIUS = 100;
-  let color = isLevelTile ? "grey" : "#f5a8f3";
+  let color = isLevelTile ? "#D9D9D9" : "#FFA800";
   return new QuarterCircle(
     x,
     y,
@@ -1054,46 +1057,54 @@ function PinkQuarterCircle(
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const container = document.getElementById("container");
-const level_number = document.getElementById("level");
+
 console.log(container);
 
 canvas.width = container.clientWidth + 300;
 canvas.height = container.clientHeight + 300;
 
-console.log("First - ", canvas.width);
-
-// const range_slider = document.getElementById("canvas-scale");
-// console.log(range_slider);
-
-// range_slider.addEventListener("change", (event) => {
-//   console.log("VAL  - ", range_slider.value, typeof range_slider.value);
-//   const val = Number(range_slider.value);
-//   canvas.width = container.clientWidth + val;
-//   canvas.height = container.clientHeight + val;
-//   console.log("After - ", canvas.width);
-// });
-
 //TODO
-// Drag shapes on both sides of canvas
-// Randomize the shapes location on both sides
-//Landing Page -
-//Add shape type to csv data
-//Add form on landing page for what type of mosue user is using
+// - Store User ID in local storage so it can be used in csv file name
+// - Add parameters the the tiles-game route to specify what level it should be,
+// then use those paramertrs to call changeCurrentLevel(2, 1); with the correct values
+// also maybe store those values in local storage so we can progreess between levels when sent to scoring page
+
+function getLocalStorageOrNull(key) {
+  try {
+    const value = localStorage.getItem(key);
+    return value !== null ? value : null;
+  } catch (error) {
+    console.error("Error retrieving from local storage:", error);
+    return null;
+  }
+}
 
 //====================================
 //          Global Variables
 //====================================
 
-const shapes = [];
-let current_level = 2;
-let current_sub_level = 1;
-level_number.innerHTML = current_level;
-
+//Shape Stuff
+let shapes = [];
 let current_shape_index = null;
 
+//Level Data
+let current_level = 1;
+let current_sub_level = 1;
+
+//Progress Bar
+const progressBar = document.getElementById("progressBar");
+const progressBarPercent = document.getElementById("progress-bar-percent");
+
+//Mouse Data
 let mouse_motion_array = [];
 let lastCollectionTime = 0;
-const throttlingInterval = 100; // 100 milliseconds
+const throttlingInterval = 150; // 150 milliseconds
+
+//  -> Mouse Acceleration
+//      -> Define variables to store previous mouse position and timestamp
+let prevMouseX = 0;
+let prevMouseY = 0;
+let prevTimestamp = 0;
 
 //====================================
 //          Building Blocks
@@ -1101,8 +1112,8 @@ const throttlingInterval = 100; // 100 milliseconds
 
 // Create an array with instances of different shapes
 const building_blocks = [
-  OrangeSquare((canvas.width * 0.25) / 4 - 20, 10, 0, false, true),
-  RedCircle((canvas.width * 0.25) / 2, 10, 0, false, true),
+  OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
+  RedCircle((canvas.width * 0.25) / 10, 20, 0, false, true),
   GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
   BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
   GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
@@ -1112,7 +1123,7 @@ const building_blocks = [
   PinkQuarterCircle((canvas.width * 0.25) / 2 - 60, 750, 0, false, true),
 ];
 
-shapes.push(...building_blocks);
+// shapes.push(...building_blocks);
 
 function drawSectionLines() {
   const section_one_line = canvas.width * 0.25;
@@ -1137,7 +1148,7 @@ function drawSectionLines() {
 
 let LEVEL_X = canvas.width / 2;
 let LEVEL_Y = canvas.height / 2;
-
+// Puzzl pices the ones in grey.
 const LEVELS = {
   1: {
     1: [
@@ -1148,14 +1159,6 @@ const LEVELS = {
       RedCircle(LEVEL_X - 100, LEVEL_Y + 20, 0, true), // Right Circle
       BlueRightTriangle(LEVEL_X + 120, LEVEL_Y - 90, 270, true), // Right - Triangle
       BlueRightTriangle(LEVEL_X - 210, LEVEL_Y - 50, 180, true), // Left - Triangle],
-
-      // OrangeSquare(350 + LEVEL_X, 400 + LEVEL_Y, 0, true), // Right Middle
-      // OrangeSquare(350 + LEVEL_X, 290 + LEVEL_Y, 0, true), //Left Middle
-      // OrangeSquare(240 + LEVEL_X, 400 + LEVEL_Y, 0, true), //Top Square
-      // RedCircle(400 + LEVEL_X, 560 + LEVEL_Y, 0, true), // Right Circle
-      // RedCircle(290 + LEVEL_X, 560 + LEVEL_Y, 0, true), //Left Circle
-      // BlueRightTriangle(460 + LEVEL_X, 400 + LEVEL_Y, 270, true), // Right - Triangle
-      // BlueRightTriangle(130 + LEVEL_X, 440 + LEVEL_Y, 180, true), // Left - Triangle],
     ],
 
     2: [],
@@ -1176,32 +1179,47 @@ const LEVELS = {
   },
   3: {
     1: [
-      OrangeSquare(300 + LEVEL_X, 200 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 310 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 420 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 530 + LEVEL_Y, 0, true), // Body
-      OrangeSquare(300 + LEVEL_X, 640 + LEVEL_Y, 0, true), // Body
-      GreenEquilateralTriangle(440 + LEVEL_X, 470 + LEVEL_Y, 90, true), //Right Middle Wing
-      GreenEquilateralTriangle(260 + LEVEL_X, 470 + LEVEL_Y, 30, true), //Left Middle Wing
-      BlueHexagon(490 + LEVEL_X, 370 + LEVEL_Y, 30, true), //Top Right Wing
-      BlueHexagon(490 + LEVEL_X, 570 + LEVEL_Y, 30, true), //Bottom Right Wing
-      BlueHexagon(210 + LEVEL_X, 370 + LEVEL_Y, 30, true), //Top Left Wing
-      BlueHexagon(210 + LEVEL_X, 570 + LEVEL_Y, 30, true), //Bottom Left Wing
-      GreenEquilateralTriangle(600 + LEVEL_X, 370 + LEVEL_Y, 90, true), //Top Right Wing
-      GreenEquilateralTriangle(600 + LEVEL_X, 570 + LEVEL_Y, 90, true), //Bottom Right Wing
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 370, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 260, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 150, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y - 40, 0, true), // Body
+      OrangeSquare(LEVEL_X - 50, LEVEL_Y + 70, 0, true), // Body
+      YellowDiamond(LEVEL_X - 190, LEVEL_Y - 500, 110, true), //Left Ear
+      YellowDiamond(LEVEL_X + 120, LEVEL_Y - 500, 70, true), //Right Ear
+      GreenEquilateralTriangle(LEVEL_X + 85, LEVEL_Y - 100, 90, true), //Right Middle Wing
+      GreenEquilateralTriangle(LEVEL_X - 85, LEVEL_Y - 100, 30, true), //Left Middle Wing
+      BlueHexagon(LEVEL_X + 135, LEVEL_Y - 210, 30, true), //Top Right Wing
+      BlueHexagon(LEVEL_X - 135, LEVEL_Y - 210, 30, true), //Bottom Right Wing
+      BlueHexagon(LEVEL_X + 135, LEVEL_Y + 10, 30, true), //Top Left Wing
+      BlueHexagon(LEVEL_X - 135, LEVEL_Y + 10, 30, true), //Bottom Left Wing
+      GreenEquilateralTriangle(LEVEL_X + 245, LEVEL_Y - 210, 90, true), //Top Right Wing
+      GreenEquilateralTriangle(LEVEL_X + 245, LEVEL_Y + 10, 90, true), //Bottom Right Wing
+      GreenEquilateralTriangle(LEVEL_X - 245, LEVEL_Y - 210, 30, true), //Top Left Wing
+      GreenEquilateralTriangle(LEVEL_X - 245, LEVEL_Y + 10, 30, true), //Bottom Left Wing
+      PurpleDiamond(LEVEL_X - 10, LEVEL_Y + 120, 115, true), //Stinger
     ],
   },
 };
 
-//Add Level to canvas
-shapes.push(...LEVELS[current_level][current_sub_level]);
+function changeCurrentLevel(level, sub_level) {
+  current_level = level;
+  current_sub_level = sub_level;
+
+  //Reset All Shapes on screen
+  shapes = [];
+
+  //Add Back and Draw needed blocks
+  shapes.push(...building_blocks);
+  shapes.push(...LEVELS[current_level][current_sub_level]);
+
+  //Update UI
+  drawShapes();
+  updateProgressBar();
+}
 
 //====================================
 //          Progress Bar
 //====================================
-
-const progressBar = document.getElementById("progressBar");
-const progressBarPercent = document.getElementById("progress-bar-percent");
 
 // Update the progress bar with a percentage value
 function updateProgressBar() {
@@ -1233,13 +1251,13 @@ function getProgressBarPercentage() {
 //             Utils
 //====================================
 
-function calculateMousePos(evt) {
+function calculateMousePos(clientX, clientY) {
   /* Function to calculate mouse coordinates relative to the canvas*/
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
-  const x = (evt.clientX - rect.left) * scaleX;
-  const y = (evt.clientY - rect.top) * scaleY;
+  const x = (clientX - rect.left) * scaleX;
+  const y = (clientY - rect.top) * scaleY;
   return { x, y };
 }
 
@@ -1271,101 +1289,28 @@ function postMouseMotionData() {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ data: mouse_motion_array }),
+    body: JSON.stringify({
+      data: mouse_motion_array,
+      level: current_level,
+      userID: getLocalStorageOrNull("userID"),
+    }),
   })
     .then((res) => console.log(res))
     .catch((err) => console.log(err));
 }
 
-//====================================
-//          Block Options
-//====================================
-// const shapeContainer1 = document.getElementById("shapeContainer1");
-// const shapeContainer2 = document.getElementById("shapeContainer2");
+function postLevelMouseData() {
+  /*
+    This function will post the acculated data of the mouse movements
+    for the current level to the server to create the csv file. It will then
+    reset all of the accumulators
+  */
 
-// const shapeImages = document.querySelectorAll(".building-blocks");
-
-// // Prevent the default "no-drop" behavior on the canvas element
-// canvas.addEventListener("dragover", (event) => {
-//   event.preventDefault();
-// });
-
-// [shapeContainer1, shapeContainer2].forEach((container) => {
-//   container.addEventListener("mousedown", shapeContainerMouseDown);
-// });
-
-// function shapeContainerMouseDown(event) {
-//   if (event.target.tagName === "IMG") {
-//     draggingImage = {
-//       image: event.target,
-//       offsetX: event.offsetX,
-//       offsetY: event.offsetY,
-//     };
-
-//     // Set the image element to be draggable
-//     event.target.draggable = true;
-
-//     // Add the necessary event listeners for the dragging behavior
-//     event.target.addEventListener("dragstart", dragStartHandler);
-//     event.target.addEventListener("dragend", dragEndHandler);
-//   }
-// }
-
-// function dragStartHandler(event) {
-//   draggingImage = {
-//     image: event.target,
-//     offsetX: event.offsetX,
-//     offsetY: event.offsetY,
-//   };
-
-//   // Set the image element to be dragged as a custom cursor
-//   event.dataTransfer.setDragImage(
-//     event.target,
-//     draggingImage.offsetX,
-//     draggingImage.offsetY
-//   );
-// }
-
-// function dragEndHandler(event) {
-//   const { x, y } = calculateMousePos(event);
-
-//   // Check if the mouse is released over the canvas
-//   if (x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height) {
-//     const shapeType = draggingImage.image.getAttribute("data-shape");
-
-//     let newShape;
-//     if (shapeType === "square") {
-//       newShape = OrangeSquare(
-//         x - draggingImage.offsetX,
-//         y - draggingImage.offsetY
-//       );
-//     } else if (shapeType === "circle") {
-//       newShape = RedCircle(x, y);
-//     } else if (shapeType === "rightTriangle") {
-//       newShape = BlueRightTriangle(
-//         x - draggingImage.offsetX,
-//         y - draggingImage.offsetY
-//       );
-//     }
-
-//     // Add the new shape to the shapes array
-//     shapes.push(newShape);
-
-//     // Redraw the canvas
-//     drawShapes();
-
-//     let shape = shapes[shapes.length - 1];
-//     for (let targetShape of shapes.filter((s) => s.isLevelShape)) {
-//       // Check if the shape is close enough to a special shape and snap it if true
-//       shape.snapToTargetShape(targetShape);
-//       updateProgressBar();
-//     }
-
-//     drawShapes();
-//   }
-
-//   draggingImage = null;
-// }
+  console.log("End of motion - ", mouse_motion_array);
+  postMouseMotionData();
+  mouse_motion_accumulator = 0;
+  mouse_motion_array = [];
+}
 
 //====================================
 //      Controls / EventListeners
@@ -1374,9 +1319,22 @@ function mouse_down(event) {
   event.preventDefault();
 
   console.log("Dragging Start  - ", event.clientX, " , ", event.clientY);
-  // mouse_motion_array.push([event.clientX, event.clientY, getTimestamp()]); //Start of mouse motion
 
-  const { x, y } = calculateMousePos(event);
+  let clientX = 0;
+  let clientY = 0;
+
+  // Handle touch events as well
+  if (event.type === "touchstart") {
+    // Get touch coordinates
+    const touch = event.touches[0];
+    clientX = touch.clientX;
+    clientY = touch.clientY;
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
+  const { x, y } = calculateMousePos(clientX, clientY);
 
   // Check if the mouse is inside any shape
   for (let i = shapes.length - 1; i >= 0; i--) {
@@ -1418,32 +1376,82 @@ function mouse_up(event) {
 
   if (current_shape_index === null) return;
 
-  //Reset and Post Mouse Motion
-  console.log("End of motion - ", mouse_motion_array);
-  postMouseMotionData();
-  mouse_motion_accumulator = 0;
-  mouse_motion_array = [];
-
   const shape = shapes[current_shape_index];
   shape.mouseUp();
   current_shape_index = null;
+
+  // Add the identifier for the end of stroke
+  mouse_motion_array.push([
+    "END_OF_STROKE",
+    0,
+    0,
+    getTimestamp(),
+    "END_OF_STROKE",
+    0,
+    0,
+    0,
+  ]);
 }
 
 function mouse_move(event) {
   if (current_shape_index === null) return;
 
+  let clientX = 0;
+  let clientY = 0;
+
+  // Handle touch events as well
+  if (event.type === "touchmove") {
+    // Get touch coordinates
+    const touch = event.touches[0];
+    clientX = Math.round(touch.clientX);
+    clientY = Math.round(touch.clientY);
+  } else {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  }
+
   //Collect mouse data every interval set by global var
   const currentTime = Date.now();
+
+  const { x, y } = calculateMousePos(clientX, clientY);
+
+  // Calculate the change in position and time
+  const dx = x - prevMouseX;
+  const dy = y - prevMouseY;
+  const dt = currentTime - prevTimestamp;
+
+  // Calculate the acceleration
+  const accelerationX = dx / dt;
+  const accelerationY = dy / dt;
+
+  const accelerationX_in_px_per_s_squared = accelerationX * 1000;
+  const accelerationY_in_px_per_s_squared = accelerationY * 1000;
+
+  // Store the current mouse position and timestamp for the next iteration
+  prevMouseX = x;
+  prevMouseY = y;
+  prevTimestamp = currentTime;
+
+  console.log(
+    "X acc - ",
+    Math.round(accelerationX_in_px_per_s_squared),
+    "   Y acc - ",
+    Math.round(accelerationY_in_px_per_s_squared)
+  );
 
   // Check if enough time has passed since the last collection
   if (currentTime - lastCollectionTime >= throttlingInterval) {
     if (mouse_motion_array) {
-      console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
+      // console.log("Dragging Img - ", event.clientX, " , ", event.clientY);
       mouse_motion_array.push([
-        event.clientX,
-        event.clientY,
+        clientX,
+        clientY,
         getTimestamp(),
         shapes[current_shape_index].type,
+        Math.round(accelerationX_in_px_per_s_squared),
+        Math.round(accelerationY_in_px_per_s_squared),
+        window.screen.width, // Add screen width to the data
+        window.screen.height,
       ]);
       lastCollectionTime = currentTime;
     }
@@ -1454,21 +1462,19 @@ function mouse_move(event) {
     // Check if the shape is close enough to a special shape and snap it if true
     shape.snapToTargetShape(targetShape);
     updateProgressBar();
-    if (getProgressBarPercentage() == 100) {
-      window.location.href = "/scoring-page";
-      //   fetch("/scoring", {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     // body: JSON.stringify({ data: mouse_motion_array }),
-      //   })
-      //     .then((res) => console.log(res))
-      //     .catch((err) => console.log(err));
-    }
   }
 
-  const { x, y } = calculateMousePos(event);
+  if (getProgressBarPercentage() == 100) {
+    if (mouse_motion_array.length != 0) {
+      postLevelMouseData(); //Create csv
+    }
+    setTimeout(() => {}, 1000); // Wait 1s
+    // window.location.href = "/scoring-page"; //Send to scoring page
+    window.location.href = `/scoring_page?userID=${getLocalStorageOrNull(
+      "userID"
+    )}&level=${getLocalStorageOrNull("currentLevel")}`; //Goto scoring page
+  }
+
   shapes[current_shape_index].mouseMove(x, y);
 
   drawShapes();
@@ -1478,10 +1484,13 @@ canvas.addEventListener("mousedown", mouse_down);
 canvas.addEventListener("mouseup", mouse_up);
 canvas.addEventListener("mousemove", mouse_move);
 
+canvas.addEventListener("touchstart", mouse_down);
+canvas.addEventListener("touchend", mouse_up);
+canvas.addEventListener("touchmove", mouse_move);
+
 //====================================
 //          Game Functions
 //====================================
-
 function drawShapes() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawSectionLines();
@@ -1492,7 +1501,6 @@ function drawShapes() {
 }
 
 //Testing
-
 function rotateCurrentShape(deg) {
   if (current_shape_index !== null) {
     const shape = shapes[current_shape_index];
