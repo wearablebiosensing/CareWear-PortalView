@@ -3,6 +3,7 @@ class Shape {
     this.x = x;
     this.y = y;
     this.color = color;
+    // color when the shapes are done matching.
     this.doneColor = "#478F96";
     this.rotation = 0; //Maybe this.rotation = rotate(rotation)
     this.rotate(rotation);
@@ -863,7 +864,7 @@ function OrangeSquare(
   isBuildingBlock = false
 ) {
   const SQUARE_SIZE = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#ffc061";
+  let color = isLevelTile ? "#D9D9D9" : "#65A7FF";
   return new Square(
     x,
     y,
@@ -884,7 +885,7 @@ function RedCircle(
   isBuildingBlock = false
 ) {
   const CIRCLE_RADIUS = 50;
-  let color = isLevelTile ? "#D9D9D9" : "#F29595";
+  let color = isLevelTile ? "#D9D9D9" : "#F08C8C";
   return new Circle(
     x,
     y,
@@ -905,7 +906,7 @@ function BlueRightTriangle(
 ) {
   const BASE = 100;
   const HEIGHT = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#90C0FF";
+  let color = isLevelTile ? "#D9D9D9" : "#968FFF";
   return new RightTriangle(
     x,
     y,
@@ -927,7 +928,7 @@ function GreenTrapezoid(
 ) {
   const BASE = 200;
   const HEIGHT = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#61a962";
+  let color = isLevelTile ? "#D9D9D9" : "#6D14A4";
   return new Trapezoid(
     x,
     y,
@@ -948,7 +949,7 @@ function GreenEquilateralTriangle(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 95;
-  let color = isLevelTile ? "#D9D9D9" : "#a1e87e";
+  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
   return new EquilateralTriangle(
     x,
     y,
@@ -968,7 +969,7 @@ function BlueHexagon(
   isBuildingBlock = false
 ) {
   const SIDE_LENGTH = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#1184e2";
+  let color = isLevelTile ? "#D9D9D9" : "#82D1FE";
 
   return new Hexagon(
     x,
@@ -990,7 +991,7 @@ function YellowDiamond(
 ) {
   const WIDTH = 70;
   const HEIGHT = 200;
-  let color = isLevelTile ? "#D9D9D9" : "#FFCC4D";
+  let color = isLevelTile ? "#D9D9D9" : "#81E5DB";
 
   return new Diamond(
     x,
@@ -1012,6 +1013,7 @@ function PurpleDiamond(
   isLevelTile = false,
   isBuildingBlock = false
 ) {
+  // TODO: Change this.
   const WIDTH = 100;
   const HEIGHT = 200;
   let color = isLevelTile ? "#D9D9D9" : "#9F9AFF";
@@ -1037,7 +1039,7 @@ function PinkQuarterCircle(
   isBuildingBlock = false
 ) {
   const RADIUS = 100;
-  let color = isLevelTile ? "#D9D9D9" : "#f5a8f3";
+  let color = isLevelTile ? "#D9D9D9" : "#FFA800";
   return new QuarterCircle(
     x,
     y,
@@ -1111,7 +1113,7 @@ let prevTimestamp = 0;
 // Create an array with instances of different shapes
 const building_blocks = [
   OrangeSquare((canvas.width * 0.55) / 4 - 20, 10, 0, false, true),
-  RedCircle((canvas.width * 0.25) / 2, 10, 0, false, true),
+  RedCircle((canvas.width * 0.25) / 10, 20, 0, false, true),
   GreenTrapezoid((canvas.width * 0.25) / 4 - 20, 130, 180, false, true),
   BlueRightTriangle((canvas.width * 0.25) / 4 - 20, 260, 0, false, true),
   GreenEquilateralTriangle((canvas.width * 0.25) / 2 + 40, 310, 0, false, true),
@@ -1146,7 +1148,7 @@ function drawSectionLines() {
 
 let LEVEL_X = canvas.width / 2;
 let LEVEL_Y = canvas.height / 2;
-
+// Puzzl pices the ones in grey.
 const LEVELS = {
   1: {
     1: [
@@ -1489,7 +1491,6 @@ canvas.addEventListener("touchmove", mouse_move);
 //====================================
 //          Game Functions
 //====================================
-
 function drawShapes() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawSectionLines();
@@ -1500,7 +1501,6 @@ function drawShapes() {
 }
 
 //Testing
-
 function rotateCurrentShape(deg) {
   if (current_shape_index !== null) {
     const shape = shapes[current_shape_index];

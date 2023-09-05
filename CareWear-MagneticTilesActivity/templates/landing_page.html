@@ -12,17 +12,84 @@
       href="{{ url_for('static', filename='css/landing_page.css') }}"
     />
     <title>Landing Page</title>
+    <style>
+      .gfg {
+          margin: 3%;
+          position: relative;
+      }
+     
+    /*This CSS code is defining the styles for a container that holds text*/
+      .text-container {
+          font-family: "IBM Plex Sans", sans-serif;
+          position: absolute;
+          color: #478F96;
+          text-align: center;
+          font-size: calc(4vh + 3vw);
+          left: 18rem;
+          top: -3rem;
+          margin-left: 15%;
+          /* background-color: rgb(41, 41, 41, 0.8); */
+          padding: 0 1rem;
+      }
+      .text-container-m5connection {
+          font-family: "IBM Plex Sans", sans-serif;
+          position: absolute;
+          color: #979797;
+          text-align: center;
+          font-size: 30px;
+          left: 18rem;
+          top: 34rem;
+          margin-left: 15%;
+          /* background-color: rgb(41, 41, 41, 0.8); */
+          padding: 0 1rem;
+      }
+      .start-button {
+        position: absolute;
+        background-color: #478F96; /* Green */
+        border-radius: 10px;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        width: 150px;
+        left: 18rem;
+          top: 38rem;
+          margin-left: 24%;
+
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        font-family: "IBM Plex Sans", sans-serif;
+
+        }
+
+        .disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+  </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('mqtt_message2', function(msg) {
+            document.getElementById('mqtt-init').innerHTML = msg.data;
+        });
+    </script>
+
   </head>
   <body>
-    <div class="landing_container">
-      <div class="landing_title">Mind Game</div>
-      <div class="landing_hero_image_container">
-        <img
-          class="landing_hero_image"
-          src="{{ url_for('static', filename='images/TableLogo.svg') }}"
-          alt="Group"
-        />
-      </div>
+      <div class="gfg">
+        <img class="landing_hero_image",
+        style="height: 700px ; width:1000px; margin-left: 15%; margin-top: 0;",
+        src="{{ url_for('static', filename='images/landing_page_logo.png') }}"
+        alt="Group">
+                    <div class="text-container">Mind Game</div>
+                    <div class="text-container-m5connection">Waiting for M5 to connect... </div>
+                    <button id="submitBtn"  class="start-button" required> Start </button>
+            </div>
+      
 
       <div class="input-wrapper">
         <div class="input-container">
