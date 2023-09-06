@@ -42,29 +42,28 @@ firebase_admin.initialize_app(cred, {
 ref = db.reference('/sensors_message')  # Path to your sensor data node in the database
 socketio = SocketIO(app)
 # Subscribe to multiple topics
-topics = [("M5StackcPlus/acceleration", 0), ("M5StackcPlus/hello", 0)]  # Replace with your desired topics and QoS level
+# topics = [("M5StackcPlus/acceleration", 0), ("M5StackcPlus/hello", 0)]  # Replace with your desired topics and QoS level
 
 # MQTT callback functions
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT broker")
-    for topic, qos in topics:
-        client.subscribe(topic,qos)  # Subscribe to the MQTT topic
+    # for topic, qos in topics:
+    client.subscribe("M5StackcPlus/acceleration",0)  # Subscribe to the MQTT topic
 
 def on_message(client, userdata, message):
     topic = message.topic
     payload = message.payload.decode("utf-8")
     print(f"Received message on topic '{topic}': {payload}")
-    if topic.split("/") == "hello":
-        data = message.payload.decode()
-        print(f"Received message Hello Topic: {topic}")
-        print(f"Received message: {data}")
-        socketio.emit('mqtt_message2', {'data': data})
-    if topic.split("/") == "acceleration":
-        data = message.payload.decode()
-        print(f"Received message acceleration: {topic}")
-        print(f"Received message: {data}")
-        socketio.emit('mqtt_message', {'data': data})
+    # if topic.split("/") == "hello":
+    #     data = message.payload.decode()
+    #     print(f"Received message Hello Topic: {topic}")
+    #     print(f"Received message: {data}")
+    #     socketio.emit('mqtt_message2', {'data': data})
+    data = message.payload.decode()
+    print(f"Received message acceleration: {topic}")
+    print(f"Received message: {data}")
+    socketio.emit('mqtt_message', {'data': data})
 
 
 
